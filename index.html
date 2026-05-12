@@ -3,83 +3,105 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HTML 도구 허브</title>
+  <title>업무 도구 허브</title>
   <style>
     body {
       margin: 0;
-      padding: 24px;
-      font-family: Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f3f6fb;
-      color: #111827;
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      color: #222;
     }
+
     .wrap {
-      max-width: 900px;
+      max-width: 960px;
       margin: 0 auto;
+      padding: 48px 20px;
     }
-    .hero {
-      background: linear-gradient(135deg, #111827, #2563eb);
-      color: white;
-      padding: 32px;
-      border-radius: 28px;
-      margin-bottom: 20px;
-    }
+
     h1 {
-      margin: 0 0 8px;
       font-size: 32px;
+      margin-bottom: 8px;
     }
+
+    .desc {
+      color: #666;
+      margin-bottom: 32px;
+    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
+      gap: 20px;
     }
+
     .card {
-      display: block;
-      padding: 22px;
-      border-radius: 22px;
-      background: white;
+      background: #fff;
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
       text-decoration: none;
-      color: #111827;
-      box-shadow: 0 12px 30px rgba(15, 23, 42, .08);
-      border: 1px solid #e5e7eb;
+      color: inherit;
+      transition: 0.2s;
+      border: 1px solid #e5e8ef;
     }
+
     .card:hover {
-      transform: translateY(-3px);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.12);
     }
-    .card h2 {
-      margin: 0 0 8px;
+
+    .emoji {
+      font-size: 34px;
+      margin-bottom: 16px;
+    }
+
+    .title {
       font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 8px;
     }
-    .card p {
-      margin: 0;
-      color: #64748b;
-      line-height: 1.5;
+
+    .text {
       font-size: 14px;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    .footer {
+      margin-top: 36px;
+      font-size: 13px;
+      color: #999;
     }
   </style>
 </head>
 <body>
   <main class="wrap">
-    <section class="hero">
-      <h1>HTML 도구 허브</h1>
-      <p>자주 쓰는 HTML 툴을 한 곳에서 바로 실행하세요.</p>
-    </section>
+    <h1>업무 도구 허브</h1>
+    <p class="desc">필요한 도구를 선택해서 바로 실행하세요.</p>
 
     <section class="grid">
       <a class="card" href="profit-calculator.html">
-        <h2>손익 계산기</h2>
-        <p>매출, 원가, 수수료를 입력해 영업이익을 계산합니다.</p>
+        <div class="emoji">📊</div>
+        <div class="title">손익 계산기</div>
+        <div class="text">판매가, 원가, 수량 등을 입력해 손익을 계산합니다.</div>
       </a>
 
       <a class="card" href="image-converter.html">
-        <h2>이미지 변환기</h2>
-        <p>이미지를 용도별 규격으로 변환합니다.</p>
+        <div class="emoji">🖼️</div>
+        <div class="title">이미지 컨버터</div>
+        <div class="text">이미지를 용도별 규격에 맞게 변환합니다.</div>
       </a>
 
-      <a class="card" href="baby-growth.html">
-        <h2>성장일기</h2>
-        <p>아이 성장 기록을 평균 발달 기준과 비교합니다.</p>
+      <a class="card" href="event_detail_page_format_builder_link.html">
+        <div class="emoji">🧩</div>
+        <div class="title">기획전 상세페이지 빌더</div>
+        <div class="text">키비주얼, 상품 영역, 설명 영역을 구성합니다.</div>
       </a>
     </section>
+
+    <div class="footer">
+      같은 GitHub Pages 폴더에 HTML 파일들이 있어야 정상 연결됩니다.
+    </div>
   </main>
 </body>
 </html>
