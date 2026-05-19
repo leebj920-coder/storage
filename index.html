@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>빵돌이의 보물창고</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, "Noto Sans KR", sans-serif;
+      background: #f5f7fb;
+      color: #222;
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 48px 20px;
+    }
+
+    .header {
+      margin-bottom: 32px;
+    }
+
+    h1 {
+      font-size: 32px;
+      margin: 0 0 8px;
+      letter-spacing: -0.03em;
+    }
+
+    .desc {
+      color: #666;
+      margin: 0;
+      line-height: 1.5;
+      font-size: 15px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      display: block;
+      background: #fff;
+      border-radius: 18px;
+      padding: 24px;
+      text-decoration: none;
+      color: inherit;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      min-height: 180px;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    }
+
+    .emoji {
+      font-size: 34px;
+      margin-bottom: 16px;
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      letter-spacing: -0.02em;
+    }
+
+    .text {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.55;
+      word-break: keep-all;
+    }
+
+    @media (max-width: 600px) {
+      .wrap {
+        padding: 32px 16px;
+      }
+
+      h1 {
+        font-size: 26px;
+      }
+
+      .card {
+        padding: 20px;
+        min-height: 160px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="header">
+      <h1>빵돌이의 보물창고</h1>
+      <p class="desc">필요한 업무 도구를 선택해 사용하세요.</p>
+    </header>
+
+    <section class="grid">
+      <a class="card" href="profit-calculator.html">
+        <div class="emoji">📊</div>
+        <div class="title">제품별 손익 계산기</div>
+        <div class="text">판매가, 원가, 수량 등을 입력해 손익을 계산합니다.</div>
+      </a>
+
+      <a class="card" href="image-converter.html">
+        <div class="emoji">🖼️</div>
+        <div class="title">이미지 컨버터</div>
+        <div class="text">이미지를 용도별 규격에 맞게 변환합니다.</div>
+      </a>
+
+      <a class="card" href="event_detail_page_format_builder_link.html">
+        <div class="emoji">🧩</div>
+        <div class="title">기획전 상세페이지 빌더</div>
+        <div class="text">키비주얼, 상품 영역, 설명 영역을 구성합니다.</div>
+      </a>
+
+      <a class="card" href="cost.html">
+        <div class="emoji">💸</div>
+        <div class="title">직영점포 인건비 계산기</div>
+        <div class="text">직원별 근로시간, 주휴수당, 월별 인건비를 계산합니다.</div>
+      </a>
+
+      <a class="card" href="roi-calculator.html">
+        <div class="emoji">📈</div>
+        <div class="title">점포 ROI 계산기</div>
+        <div class="text">점포 신규 개설, 점주 교체, 리뉴얼 등 상세 비용 입력으로 ROI·회수기간·손익분기점을 알아보세요.</div>
+      </a>
+    </section>
+  </main>
+</body>
+</html>
