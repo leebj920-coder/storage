@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 얼굴 스캔 시술 시뮬레이터</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif;
+      background: linear-gradient(135deg, #eff6ff 0%, #fff 45%, #dbeafe 100%);
+      color: #0f172a;
+    }
+    .app {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 34px 18px 60px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .brand {
+      display: flex;
+      gap: 13px;
+      align-items: center;
+    }
+    .logo {
+      width: 48px; height: 48px;
+      border-radius: 18px;
+      background: #2563eb;
+      color: white;
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      box-shadow: 0 10px 30px rgba(37, 99, 235, .25);
+    }
+    h1 { margin: 0; font-size: 28px; letter-spacing: -0.04em; }
+    .subtitle { margin: 5px 0 0; color: #475569; font-size: 14px; }
+    .badge {
+      background: rgba(255,255,255,.7);
+      border: 1px solid #bfdbfe;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #1d4ed8;
+      white-space: nowrap;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 22px;
+      align-items: start;
+    }
+    .panel {
+      background: rgba(255,255,255,.86);
+      border: 1px solid rgba(147,197,253,.75);
+      border-radius: 28px;
+      box-shadow: 0 20px 60px rgba(30, 64, 175, .12);
+      padding: 22px;
+      backdrop-filter: blur(16px);
+    }
+    .section-title {
+      margin: 0 0 14px;
+      font-size: 20px;
+      letter-spacing: -0.04em;
+    }
+    .scan-box {
+      position: relative;
+      overflow: hidden;
+      border-radius: 26px;
+      background: radial-gradient(circle at 50% 35%, #fff 0%, #dbeafe 45%, #93c5fd 100%);
+      min-height: 520px;
+      display: grid;
+      place-items: center;
+      border: 1px solid #bfdbfe;
+    }
+    video, canvas.preview {
+      width: 100%; height: 100%; object-fit: cover;
+      position: absolute; inset: 0;
+      transform-origin: center center;
+    }
+    .mirror-fix {
+      transform: scaleX(-1);
+    }
+    .face-ring {
+      position: relative;
+      width: min(68vw, 330px);
+      aspect-ratio: 3 / 4;
+      border: 3px dashed rgba(37,99,235,.58);
+      border-radius: 50% 50% 45% 45%;
+      display: grid;
+      place-items: center;
+      z-index: 3;
+      background: rgba(255,255,255,.12);
+      font-weight: 800;
+      color: #1e40af;
+    }
+    .face-ring::before {
+      content: "";
+      position: absolute;
+      inset: -18px;
+      border-radius: inherit;
+      border: 1px solid rgba(255,255,255,.8);
+    }
+    .guide-text {
+      position: absolute;
+      top: 20px; left: 20px; right: 20px;
+      z-index: 4;
+      background: rgba(15,23,42,.72);
+      color: #fff;
+      padding: 14px 16px;
+      border-radius: 18px;
+      text-align: center;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+    .timer {
+      position: absolute;
+      right: 20px; bottom: 20px;
+      z-index: 4;
+      background: #fff;
+      color: #1d4ed8;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 800;
+      box-shadow: 0 10px 25px rgba(0,0,0,.12);
+    }
+    .scan-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: #f8fbff;
+      border: 1px solid #bfdbfe;
+      border-radius: 16px;
+    }
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: #334155;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+    }
+    .toggle input {
+      appearance: none;
+      width: 42px;
+      height: 24px;
+      background: #cbd5e1;
+      border-radius: 999px;
+      position: relative;
+      outline: none;
+      cursor: pointer;
+      transition: .2s;
+    }
+    .toggle input::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0,0,0,.2);
+      transition: .2s;
+    }
+    .toggle input:checked {
+      background: #2563eb;
+    }
+    .toggle input:checked::after {
+      transform: translateX(18px);
+    }
+    .mini-note {
+      font-size: 12px;
+      color: #64748b;
+    }
+    button, .button {
+      border: 0;
+      border-radius: 18px;
+      padding: 15px 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: .2s;
+      font-size: 15px;
+    }
+    button:hover { transform: translateY(-1px); }
+    button:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+    .primary { background: #2563eb; color: #fff; }
+    .secondary { background: #dbeafe; color: #1e3a8a; }
+    .ghost { background: #fff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .help {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .help-card {
+      background: #f8fbff;
+      border: 1px solid #bfdbfe;
+      border-radius: 18px;
+      padding: 13px;
+      font-size: 12px;
+      color: #475569;
+      line-height: 1.45;
+    }
+    .help-card b { display: block; color: #0f172a; margin-bottom: 4px; font-size: 13px; }
+    .frames {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 9px;
+      margin-top: 14px;
+    }
+    .frame {
+      aspect-ratio: 1 / 1.18;
+      border-radius: 16px;
+      border: 1px dashed #93c5fd;
+      background: #eff6ff;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      color: #64748b;
+      font-size: 12px;
+      text-align: center;
+    }
+    .frame img { width: 100%; height: 100%; object-fit: cover; }
+    .selector { display: grid; gap: 14px; }
+    .tabs, .chips { display: flex; flex-wrap: wrap; gap: 9px; }
+    .chip {
+      padding: 12px 14px;
+      border-radius: 999px;
+      border: 1px solid #bfdbfe;
+      background: #fff;
+      color: #1e3a8a;
+      font-weight: 750;
+      cursor: pointer;
+      user-select: none;
+    }
+    .chip.active {
+      background: #2563eb;
+      color: #fff;
+      border-color: #2563eb;
+      box-shadow: 0 8px 22px rgba(37,99,235,.24);
+    }
+    .result-card {
+      margin-top: 18px;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid #bfdbfe;
+      background: #fff;
+    }
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 320px;
+      background: #eff6ff;
+    }
+    .compare-side {
+      position: relative;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+    .compare-side img, .compare-side canvas {
+      width: 100%; height: 100%; object-fit: cover;
+      display: block;
+    }
+    .compare-side.after img, .compare-side.after canvas { background: #e0efff; }
+    .compare-side.after::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 44%, transparent 0 16%, rgba(255,255,255,.18) 17% 23%, transparent 24% 100%);
+      pointer-events: none;
+    }
+    .label {
+      position: absolute;
+      top: 12px; left: 12px;
+      background: rgba(15,23,42,.72);
+      color: #fff;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      z-index: 2;
+    }
+    .after .label { background: #2563eb; }
+    .empty-face {
+      width: 180px; height: 230px;
+      border-radius: 50% 50% 46% 46%;
+      border: 2px solid #93c5fd;
+      display: grid;
+      place-items: center;
+      color: #64748b;
+      text-align: center;
+      padding: 20px;
+      font-size: 13px;
+    }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 14px;
+    }
+    .metric {
+      background: #f8fbff;
+      border: 1px solid #bfdbfe;
+      border-radius: 18px;
+      padding: 14px;
+      min-height: 92px;
+    }
+    .metric b { display: block; font-size: 14px; margin-bottom: 6px; }
+    .metric span { color: #475569; font-size: 12px; line-height: 1.45; }
+    .timeline {
+      margin-top: 18px;
+      display: grid;
+      gap: 12px;
+    }
+    .step {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 12px;
+      align-items: start;
+      background: #f8fbff;
+      border: 1px solid #bfdbfe;
+      border-radius: 20px;
+      padding: 14px;
+    }
+    .num {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: #dbeafe;
+      display: grid;
+      place-items: center;
+      color: #1d4ed8;
+      font-weight: 900;
+    }
+    .step b { display: block; margin-bottom: 4px; }
+    .step p { margin: 0; color: #475569; font-size: 13px; line-height: 1.5; }
+    .notice {
+      margin-top: 14px;
+      padding: 13px 14px;
+      border-radius: 18px;
+      background: #eff6ff;
+      color: #334155;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+    .hidden { display: none !important; }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+      header { align-items: flex-start; flex-direction: column; }
+      .help { grid-template-columns: repeat(2, 1fr); }
+      .scan-actions { grid-template-columns: 1fr; }
+      .metrics { grid-template-columns: 1fr; }
+      .toolbar { align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div class="brand">
+        <div class="logo">𓁹</div>
+        <div>
+          <h1>AI 얼굴 스캔 시술 시뮬레이터</h1>
+          <p class="subtitle">상하좌우 얼굴 스캔 영상으로 왜곡을 줄이고 자연스러운 예상도를 만듭니다.</p>
+        </div>
+      </div>
+      <div class="badge">BLUE UI · 좌우반전 보정 / 예상도 시뮬레이션 개선</div>
+    </header>
+
+    <section class="grid">
+      <div class="panel">
+        <h2 class="section-title">1. 8초 얼굴 스캔</h2>
+        <div class="scan-box" id="scanBox">
+          <video id="video" autoplay playsinline muted class="hidden"></video>
+          <canvas id="snapshot" class="preview hidden"></canvas>
+          <div class="guide-text" id="guideText">얼굴을 원 안에 맞추고 스캔을 시작하세요</div>
+          <div class="face-ring" id="faceRing">정면</div>
+          <div class="timer" id="timer">00:08</div>
+        </div>
+
+        <div class="scan-actions">
+          <button class="secondary" id="openCamera">카메라 켜기</button>
+          <button class="primary" id="startScan">스캔 시작</button>
+          <button class="ghost" id="uploadVideo">영상 업로드</button>
+          <input type="file" id="videoInput" accept="video/*" class="hidden" />
+        </div>
+
+        <div class="toolbar">
+          <label class="toggle">
+            <input type="checkbox" id="mirrorFix" checked />
+            <span>좌우반전 보정</span>
+          </label>
+          <div class="mini-note">정면 거울처럼 보이면 켜두고, 반대로 느껴지면 꺼주세요.</div>
+        </div>
+
+        <div class="frames" id="frames">
+          <div class="frame">정면<br>프레임</div>
+          <div class="frame">좌측<br>프레임</div>
+          <div class="frame">우측<br>프레임</div>
+          <div class="frame">상단<br>프레임</div>
+          <div class="frame">하단<br>프레임</div>
+        </div>
+
+        <div class="help">
+          <div class="help-card"><b>조명</b>정면에서 밝게, 그림자는 적게</div>
+          <div class="help-card"><b>거리</b>얼굴 전체가 원 안에 들어오게</div>
+          <div class="help-card"><b>표정</b>무표정, 입은 자연스럽게 닫기</div>
+          <div class="help-card"><b>움직임</b>천천히 좌우/상하로 회전</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2 class="section-title">2. 부위와 원하는 변화 선택</h2>
+        <div class="selector">
+          <div>
+            <p class="subtitle">시술 부위</p>
+            <div class="tabs" id="areas">
+              <div class="chip active" data-value="코">코</div>
+              <div class="chip" data-value="턱선">턱선</div>
+              <div class="chip" data-value="눈">눈</div>
+              <div class="chip" data-value="볼">볼</div>
+              <div class="chip" data-value="피부결">피부결</div>
+            </div>
+          </div>
+          <div>
+            <p class="subtitle">원하는 시술/변화</p>
+            <div class="chips" id="procedures">
+              <div class="chip active" data-value="코 높이기">코 높이기</div>
+              <div class="chip" data-value="콧볼 줄이기">콧볼 줄이기</div>
+              <div class="chip" data-value="코끝 정리">코끝 정리</div>
+            </div>
+          </div>
+          <button class="primary" id="generate">AI 예상도 보기</button>
+        </div>
+
+        <div class="result-card">
+          <div class="compare">
+            <div class="compare-side before" id="beforeSide">
+              <span class="label">현재</span>
+              <div class="empty-face">스캔 후 대표 프레임이 표시됩니다</div>
+            </div>
+            <div class="compare-side after" id="afterSide">
+              <span class="label">예상</span>
+              <div class="empty-face">선택한 시술 기준으로 예상도가 생성됩니다</div>
+            </div>
+          </div>
+          <div class="metrics">
+            <div class="metric"><b id="metric1">자연스러운 변화</b><span id="metric1Desc">얼굴 전체 조화를 우선으로 과한 보정을 피합니다.</span></div>
+            <div class="metric"><b id="metric2">회복 예상 1~2주</b><span id="metric2Desc">붓기와 멍은 개인차가 있어 상담 기준으로 조정됩니다.</span></div>
+            <div class="metric"><b id="metric3">추천 강도 보통</b><span id="metric3Desc">처음 시도 기준으로 안정적인 강도를 제안합니다.</span></div>
+          </div>
+        </div>
+
+        <div class="timeline" id="timeline"></div>
+
+        <div class="notice">
+          ※ 본 화면은 서비스 기획용 MVP 데모입니다. 실제 성형/시술 결과를 보장하지 않으며, 의료 진단이나 치료를 대체하지 않습니다. 실제 적용 시 전문의 상담, 개인정보보호, 영상 삭제 정책, 동의 절차가 반드시 필요합니다.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const $ = (id) => document.getElementById(id);
+      const video = $('video');
+      const canvas = $('snapshot');
+      const openCamera = $('openCamera');
+      const startScan = $('startScan');
+      const uploadVideo = $('uploadVideo');
+      const videoInput = $('videoInput');
+      const guideText = $('guideText');
+      const timer = $('timer');
+      const frames = $('frames');
+      const generate = $('generate');
+      const beforeSide = $('beforeSide');
+      const afterSide = $('afterSide');
+      const faceRing = $('faceRing');
+      const mirrorFix = $('mirrorFix');
+
+      let stream = null;
+      let currentMediaType = null;
+      let capturedData = null;
+      let sourceImage = null;
+      let selectedArea = '코';
+      let selectedProcedure = '코 높이기';
+      let scanInterval = null;
+
+      const guides = [
+        { text: '정면을 바라봐 주세요', ring: '정면' },
+        { text: '천천히 왼쪽으로 고개를 돌려주세요', ring: '좌측' },
+        { text: '다시 정면으로 돌아와 주세요', ring: '정면' },
+        { text: '천천히 오른쪽으로 고개를 돌려주세요', ring: '우측' },
+        { text: '살짝 위를 봐 주세요', ring: '상단' },
+        { text: '살짝 아래를 봐 주세요', ring: '하단' },
+        { text: '정면에서 1초만 멈춰 주세요', ring: '정면' },
+        { text: '스캔 완료 중입니다', ring: '완료' }
+      ];
+
+      const procedureMap = {
+        '코': ['코 높이기', '콧볼 줄이기', '코끝 정리'],
+        '턱선': ['턱선 리프팅', '이중턱 개선', '윤곽 정리'],
+        '눈': ['눈매 교정', '눈밑 개선', '쌍꺼풀 라인'],
+        '볼': ['볼륨 보정', '팔자 개선', '탄력 리프팅'],
+        '피부결': ['모공 개선', '톤 개선', '잔주름 개선']
+      };
+
+      const simulationMeta = {
+        '코 높이기': {
+          metric1: ['코 라인 입체감 강화', '콧대 중심으로 입체감을 주되 과하지 않게 반영합니다.'],
+          metric2: ['회복 예상 1~2주', '붓기 감소 후 코 라인이 더 자연스럽게 정리되는 흐름입니다.'],
+          metric3: ['추천 강도 보통', '첫 시도 기준으로 무난한 높이 변화를 권장합니다.'],
+          timeline: ['1주차 · 디자인 상담', '콧대 높이와 전체 얼굴 비율을 확인합니다.', '2주차 · 시술 진행', '필러/보형물 여부 등 방식에 따라 30~60분 내외로 진행합니다.', '1개월 후 · 라인 안정화 확인', '붓기 감소 후 콧대 라인과 옆모습 밸런스를 확인합니다.']
+        },
+        '콧볼 줄이기': {
+          metric1: ['콧볼 폭 감소 시뮬레이션', '정면 인상에서 콧망울 폭이 더 슬림해 보이도록 반영합니다.'],
+          metric2: ['회복 예상 1~2주', '초기 붓기 감소 후 정면 윤곽 차이가 더 또렷해질 수 있습니다.'],
+          metric3: ['추천 강도 약~보통', '과한 축소보다 자연스러운 폭 감소를 우선합니다.'],
+          timeline: ['1주차 · 정면 밸런스 상담', '콧볼 폭과 인중, 입술 비율을 함께 확인합니다.', '2주차 · 시술 진행', '절개/비절개 여부에 따라 접근이 달라질 수 있습니다.', '1개월 후 · 흉터/붓기 경과 확인', '정면 인상 변화가 자연스러운지 체크합니다.']
+        },
+        '코끝 정리': {
+          metric1: ['코끝 디테일 정리', '코끝이 둔해 보이지 않도록 정리된 인상을 시뮬레이션합니다.'],
+          metric2: ['회복 예상 1~2주', '미세한 각도 변화는 붓기 감소 후 더 안정적으로 보일 수 있습니다.'],
+          metric3: ['추천 강도 보통', '코끝만 과하게 세우지 않도록 조화 중심으로 권장합니다.'],
+          timeline: ['1주차 · 측면 디자인 상담', '코끝 각도와 코-입술 비율을 함께 확인합니다.', '2주차 · 시술 진행', '디자인과 지지 구조에 맞춰 시술이 진행됩니다.', '1개월 후 · 측면 라인 확인', '콧대와 코끝 연결이 자연스러운지 확인합니다.']
+        },
+        '턱선 리프팅': {
+          metric1: ['턱선 정리', '하관이 보다 타이트해 보이는 방향으로 시뮬레이션합니다.'],
+          metric2: ['회복 예상 1~2주', '리프팅 계열은 시간이 지나며 라인이 정리되는 느낌을 반영합니다.'],
+          metric3: ['추천 강도 보통', '처짐 개선 중심의 안정적인 강도를 권장합니다.'],
+          timeline: ['1주차 · 윤곽 상담', '턱선 처짐, 볼륨 분포, 이중턱 동반 여부를 확인합니다.', '2주차 · 시술 진행', '리프팅 레이저/실 등 방식별 시간과 다운타임이 다릅니다.', '1개월 후 · 탄력 경과 확인', '리프팅 유지감과 추가 시술 필요성을 확인합니다.']
+        },
+        '이중턱 개선': {
+          metric1: ['이중턱 완화', '턱 밑 볼륨을 줄여 목-턱 경계가 살아나는 느낌을 반영합니다.'],
+          metric2: ['회복 예상 1~2주', '초기 붓기 후 턱밑 라인이 더 선명해질 수 있습니다.'],
+          metric3: ['추천 강도 보통', '목선과 턱선이 함께 자연스럽게 보이도록 권장합니다.'],
+          timeline: ['1주차 · 목-턱 밸런스 상담', '지방량과 피부 탄력을 함께 확인합니다.', '2주차 · 시술 진행', '지방분해/리프팅 등 선택 방식에 따라 진행됩니다.', '1개월 후 · 목선 정리 확인', '턱 밑 잔부기와 라인 유지감을 확인합니다.']
+        },
+        '윤곽 정리': {
+          metric1: ['하관 윤곽 정리', '하관 폭을 다듬어 보다 정리된 인상을 반영합니다.'],
+          metric2: ['회복 예상 1~2주', '초기 긴장감 이후 라인이 안정화되는 흐름입니다.'],
+          metric3: ['추천 강도 약~보통', '얼굴형이 부자연스럽지 않도록 과한 변화는 피합니다.'],
+          timeline: ['1주차 · 얼굴형 상담', '광대, 볼, 턱선 연결감을 함께 확인합니다.', '2주차 · 시술 진행', '윤곽주사/리프팅 등 방식에 맞춰 진행됩니다.', '1개월 후 · 라인 밸런스 확인', '정면과 측면의 조화를 함께 점검합니다.']
+        },
+        '눈매 교정': {
+          metric1: ['눈매 또렷함 강화', '눈의 개방감과 또렷한 인상을 중심으로 시뮬레이션합니다.'],
+          metric2: ['회복 예상 1~2주', '붓기 변화에 따라 또렷함이 점진적으로 살아나는 흐름입니다.'],
+          metric3: ['추천 강도 약~보통', '인상이 과하게 달라지지 않도록 조절합니다.'],
+          timeline: ['1주차 · 눈매 디자인 상담', '눈의 가로/세로 비율과 비대칭 여부를 확인합니다.', '2주차 · 시술 진행', '매몰/절개 여부 등 방식에 따라 시간이 다릅니다.', '1개월 후 · 라인 안정화 확인', '눈매와 전체 인상의 조화를 확인합니다.']
+        },
+        '눈밑 개선': {
+          metric1: ['눈밑 피로감 완화', '다크서클과 음영을 줄여 더 환한 인상을 반영합니다.'],
+          metric2: ['회복 예상 1~2주', '멍/붓기 변화에 따라 눈밑 인상이 서서히 정리됩니다.'],
+          metric3: ['추천 강도 약~보통', '자연스럽게 피로감이 줄어드는 수준을 권장합니다.'],
+          timeline: ['1주차 · 눈밑 구조 상담', '꺼짐/불룩함 유형과 피부 두께를 확인합니다.', '2주차 · 시술 진행', '필러/레이저/수술 여부에 따라 접근이 달라집니다.', '1개월 후 · 컨디션 확인', '웃을 때와 무표정일 때 차이를 함께 점검합니다.']
+        },
+        '쌍꺼풀 라인': {
+          metric1: ['쌍꺼풀 라인 정리', '라인이 보다 또렷하고 균형 있게 보이도록 반영합니다.'],
+          metric2: ['회복 예상 1~2주', '초기 붓기 후 라인이 차분하게 정리될 수 있습니다.'],
+          metric3: ['추천 강도 보통', '기존 눈매와 어울리는 라인을 우선합니다.'],
+          timeline: ['1주차 · 라인 디자인 상담', '희망 라인 높이와 눈두덩이 볼륨을 확인합니다.', '2주차 · 시술 진행', '개인 눈 구조에 따라 매몰/절개가 달라질 수 있습니다.', '1개월 후 · 라인 경과 확인', '비대칭과 라인 안착 정도를 점검합니다.']
+        },
+        '볼륨 보정': {
+          metric1: ['볼 볼륨 보정', '꺼진 부위에 자연스러운 볼륨감을 더하는 방향을 반영합니다.'],
+          metric2: ['회복 예상 3~7일', '필러 계열 기준으로 비교적 짧은 회복 흐름을 반영합니다.'],
+          metric3: ['추천 강도 약', '과한 볼륨보다 얼굴 입체감 회복을 우선합니다.'],
+          timeline: ['1주차 · 볼륨 포인트 상담', '꺼진 부위와 광대 돌출감을 함께 확인합니다.', '2주차 · 시술 진행', '포인트별 소량 보정을 중심으로 진행됩니다.', '1개월 후 · 흡수/안정화 확인', '좌우 균형과 과교정 여부를 확인합니다.']
+        },
+        '팔자 개선': {
+          metric1: ['팔자주름 완화', '입가 음영을 줄여 보다 부드러운 인상을 반영합니다.'],
+          metric2: ['회복 예상 3~7일', '필러/스킨부스터 기준으로 비교적 짧은 회복 흐름입니다.'],
+          metric3: ['추천 강도 약~보통', '표정 움직임을 해치지 않는 수준을 우선합니다.'],
+          timeline: ['1주차 · 주름 유형 상담', '볼 처짐 기인인지 꺼짐 기인인지 확인합니다.', '2주차 · 시술 진행', '필러/리프팅 병행 여부를 상담합니다.', '1개월 후 · 유지감 확인', '웃을 때와 무표정 시 변화를 함께 봅니다.']
+        },
+        '탄력 리프팅': {
+          metric1: ['볼 탄력 개선', '중안면이 살짝 올라가 보이는 방향으로 시뮬레이션합니다.'],
+          metric2: ['회복 예상 1~2주', '탄력 시술은 시간이 지나며 당겨지는 느낌을 반영합니다.'],
+          metric3: ['추천 강도 보통', '처짐 개선 중심으로 자연스럽게 권장합니다.'],
+          timeline: ['1주차 · 탄력 상담', '볼 처짐, 팔자, 턱선 연결감을 확인합니다.', '2주차 · 시술 진행', '레이저/고주파 기반 시술 여부를 결정합니다.', '1개월 후 · 리프팅 경과 확인', '탄력 유지감과 추가 시술 간격을 확인합니다.']
+        },
+        '모공 개선': {
+          metric1: ['피부결 정돈', '모공이 덜 도드라져 보이도록 전체 피부결을 정리합니다.'],
+          metric2: ['회복 예상 2~5일', '붉은기와 건조감은 개인차가 있을 수 있습니다.'],
+          metric3: ['추천 강도 약', '민감도를 고려한 단계적 접근을 권장합니다.'],
+          timeline: ['1주차 · 피부 상태 진단', '모공 형태와 피지 분포, 민감도를 확인합니다.', '2주차 · 시술 진행', '레이저/스킨부스터 등 피부 상태에 맞춰 진행합니다.', '1개월 후 · 피부결 재평가', '모공 시각적 개선과 재생 상태를 확인합니다.']
+        },
+        '톤 개선': {
+          metric1: ['피부톤 정리', '얼굴 전체 톤을 균일하게 만들어 더 맑은 느낌을 반영합니다.'],
+          metric2: ['회복 예상 2~5일', '건조함과 붉은기는 개인에 따라 다를 수 있습니다.'],
+          metric3: ['추천 강도 약', '자극이 적은 방식부터 시작하는 것을 권장합니다.'],
+          timeline: ['1주차 · 피부톤 상담', '홍조, 색소, 칙칙함 원인을 확인합니다.', '2주차 · 시술 진행', '토닝/재생 중심으로 피부 상태에 맞게 진행합니다.', '1개월 후 · 밝기 변화 확인', '톤 균일도와 추가 관리 계획을 점검합니다.']
+        },
+        '잔주름 개선': {
+          metric1: ['잔주름 완화', '미세 주름이 덜 도드라지도록 부드럽게 반영합니다.'],
+          metric2: ['회복 예상 2~5일', '시술 종류에 따라 일시적 붉은기와 건조감이 있을 수 있습니다.'],
+          metric3: ['추천 강도 약~보통', '표정이 부자연스럽지 않도록 조절합니다.'],
+          timeline: ['1주차 · 주름 패턴 상담', '표정주름인지 피부결 주름인지 확인합니다.', '2주차 · 시술 진행', '보톡스/스킨부스터 등 적합한 방식으로 진행합니다.', '1개월 후 · 표정 자연스러움 확인', '주름 완화와 표정 유지의 균형을 확인합니다.']
+        }
+      };
+
+      function setStatus(message) {
+        guideText.textContent = message;
+        console.log('[AI Face Scan]', message);
+      }
+
+      function setRing(label) {
+        faceRing.textContent = label;
+      }
+
+      function isCameraSupported() {
+        return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+      }
+
+      function applyMirrorClass() {
+        const useMirrorFix = mirrorFix.checked;
+        video.classList.toggle('mirror-fix', useMirrorFix);
+        canvas.classList.toggle('mirror-fix', useMirrorFix && currentMediaType === 'camera');
+      }
+
+      mirrorFix.addEventListener('change', () => {
+        applyMirrorClass();
+        if (capturedData) {
+          showComparison(capturedData, null, false);
+        }
+      });
+
+      async function waitForVideoReady(targetVideo) {
+        if (targetVideo.readyState >= 2 && targetVideo.videoWidth > 0) return;
+        await new Promise((resolve, reject) => {
+          const timeout = setTimeout(() => reject(new Error('영상 로딩 시간이 초과되었습니다.')), 6000);
+          const done = () => {
+            if (targetVideo.videoWidth > 0) {
+              clearTimeout(timeout);
+              targetVideo.removeEventListener('loadeddata', done);
+              targetVideo.removeEventListener('canplay', done);
+              resolve();
+            }
+          };
+          targetVideo.addEventListener('loadeddata', done);
+          targetVideo.addEventListener('canplay', done);
+        });
+      }
+
+      async function turnOnCamera() {
+        try {
+          if (!window.isSecureContext) {
+            throw new Error('카메라는 HTTPS 또는 localhost 환경에서만 안정적으로 동작합니다.');
+          }
+          if (!isCameraSupported()) {
+            throw new Error('이 브라우저는 카메라 API를 지원하지 않습니다.');
+          }
+
+          if (stream) {
+            setStatus('카메라가 이미 켜져 있습니다. 스캔을 시작하세요');
+            return true;
+          }
+
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: 'user',
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            },
+            audio: false
+          });
+
+          currentMediaType = 'camera';
+          video.srcObject = stream;
+          video.src = '';
+          video.controls = false;
+          video.muted = true;
+          video.playsInline = true;
+          await video.play();
+          await waitForVideoReady(video);
+
+          video.classList.remove('hidden');
+          canvas.classList.add('hidden');
+          applyMirrorClass();
+          setStatus('카메라 준비 완료. 스캔을 시작하세요');
+          return true;
+        } catch (e) {
+          stream = null;
+          setStatus('카메라를 열 수 없습니다. 영상 업로드를 사용하거나 HTTPS/localhost에서 실행하세요');
+          alert(`카메라 실행 실패: ${e.message}\n\n해결 방법\n1) 브라우저 주소창의 카메라 권한 허용\n2) GitHub Pages처럼 HTTPS에서 실행\n3) 로컬이면 VS Code Live Server 또는 localhost로 실행`);
+          return false;
+        }
+      }
+
+      function getShouldFlipForCapture(sourceType = currentMediaType) {
+        return sourceType === 'camera' && mirrorFix.checked;
+      }
+
+      async function captureFrame(sourceVideo = video, sourceType = currentMediaType) {
+        await waitForVideoReady(sourceVideo);
+        const w = sourceVideo.videoWidth || 640;
+        const h = sourceVideo.videoHeight || 480;
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, w, h);
+
+        if (getShouldFlipForCapture(sourceType)) {
+          ctx.save();
+          ctx.translate(w, 0);
+          ctx.scale(-1, 1);
+          ctx.drawImage(sourceVideo, 0, 0, w, h);
+          ctx.restore();
+        } else {
+          ctx.drawImage(sourceVideo, 0, 0, w, h);
+        }
+
+        capturedData = canvas.toDataURL('image/jpeg', 0.94);
+        sourceImage = await loadImage(capturedData);
+        return capturedData;
+      }
+
+      async function loadImage(src) {
+        return await new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = () => reject(new Error('이미지를 불러오지 못했습니다.'));
+          img.src = src;
+        });
+      }
+
+      function fillFrames(imgData) {
+        const labels = ['정면', '좌측', '우측', '상단', '하단'];
+        frames.innerHTML = labels.map(label => `
+          <div class="frame"><img src="${imgData}" alt="${label} 프레임"></div>
+        `).join('');
+      }
+
+      function showComparison(beforeData, afterData = null, refreshAI = true) {
+        beforeSide.innerHTML = `<span class="label">현재</span><img src="${beforeData}" alt="현재 얼굴">`;
+        if (afterData) {
+          afterSide.innerHTML = `<span class="label">예상</span><img src="${afterData}" alt="예상 얼굴">`;
+        } else if (refreshAI && sourceImage) {
+          runSimulation();
+        } else {
+          afterSide.innerHTML = `<span class="label">예상</span><div class="empty-face">선택한 시술 기준으로 예상도가 생성됩니다</div>`;
+        }
+      }
+
+      function stopCurrentScan() {
+        if (scanInterval) {
+          clearInterval(scanInterval);
+          scanInterval = null;
+        }
+      }
+
+      function stopStream() {
+        if (stream) {
+          stream.getTracks().forEach(track => track.stop());
+          stream = null;
+        }
+      }
+
+      function buildTimeline(meta) {
+        const timeline = $('timeline');
+        const [t1, d1, t2, d2, t3, d3] = meta.timeline;
+        timeline.innerHTML = `
+          <div class="step"><div class="num">1</div><div><b>${t1}</b><p>${d1}</p></div></div>
+          <div class="step"><div class="num">2</div><div><b>${t2}</b><p>${d2}</p></div></div>
+          <div class="step"><div class="num">3</div><div><b>${t3}</b><p>${d3}</p></div></div>
+        `;
+      }
+
+      function updateMeta() {
+        const meta = simulationMeta[selectedProcedure] || simulationMeta['코 높이기'];
+        $('metric1').textContent = meta.metric1[0];
+        $('metric1Desc').textContent = meta.metric1[1];
+        $('metric2').textContent = meta.metric2[0];
+        $('metric2Desc').textContent = meta.metric2[1];
+        $('metric3').textContent = meta.metric3[0];
+        $('metric3Desc').textContent = meta.metric3[1];
+        buildTimeline(meta);
+      }
+
+      function makeCanvas(w, h) {
+        const c = document.createElement('canvas');
+        c.width = w;
+        c.height = h;
+        return c;
+      }
+
+      function clipEllipse(ctx, x, y, w, h) {
+        ctx.beginPath();
+        ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
+        ctx.clip();
+      }
+
+      function drawTransformedRegion(ctx, img, src, dst, alpha = 1, filter = 'none') {
+        ctx.save();
+        clipEllipse(ctx, dst.x, dst.y, dst.w, dst.h);
+        ctx.globalAlpha = alpha;
+        ctx.filter = filter;
+        ctx.drawImage(img, src.x, src.y, src.w, src.h, dst.x, dst.y, dst.w, dst.h);
+        ctx.restore();
+        ctx.filter = 'none';
+        ctx.globalAlpha = 1;
+      }
+
+      function drawHighlight(ctx, x, y, w, h, color = 'rgba(255,255,255,.18)') {
+        const grad = ctx.createRadialGradient(x + w/2, y + h/2, 0, x + w/2, y + h/2, Math.max(w, h));
+        grad.addColorStop(0, color);
+        grad.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.save();
+        clipEllipse(ctx, x, y, w, h);
+        ctx.fillStyle = grad;
+        ctx.fillRect(x - 10, y - 10, w + 20, h + 20);
+        ctx.restore();
+      }
+
+      function faceRegion(img, nx, ny, nw, nh) {
+        return {
+          x: img.width * nx,
+          y: img.height * ny,
+          w: img.width * nw,
+          h: img.height * nh
+        };
+      }
+
+      function paintSimulation(img, area, procedure) {
+        const c = makeCanvas(img.width, img.height);
+        const ctx = c.getContext('2d');
+        ctx.drawImage(img, 0, 0, img.width, img.height);
+
+        const nose = faceRegion(img, 0.41, 0.31, 0.18, 0.27);
+        const noseLow = faceRegion(img, 0.40, 0.47, 0.20, 0.14);
+        const noseTip = faceRegion(img, 0.43, 0.52, 0.14, 0.10);
+        const jaw = faceRegion(img, 0.24, 0.60, 0.52, 0.30);
+        const chin = faceRegion(img, 0.32, 0.66, 0.36, 0.20);
+        const leftEye = faceRegion(img, 0.24, 0.31, 0.16, 0.10);
+        const rightEye = faceRegion(img, 0.60, 0.31, 0.16, 0.10);
+        const leftUnderEye = faceRegion(img, 0.23, 0.38, 0.18, 0.09);
+        const rightUnderEye = faceRegion(img, 0.59, 0.38, 0.18, 0.09);
+        const leftCheek = faceRegion(img, 0.22, 0.44, 0.18, 0.16);
+        const rightCheek = faceRegion(img, 0.60, 0.44, 0.18, 0.16);
+        const nasoLeft = faceRegion(img, 0.31, 0.47, 0.10, 0.15);
+        const nasoRight = faceRegion(img, 0.59, 0.47, 0.10, 0.15);
+        const fullFace = faceRegion(img, 0.18, 0.15, 0.64, 0.70);
+        const forehead = faceRegion(img, 0.28, 0.16, 0.44, 0.14);
+
+        const ops = {
+          noseHeighten() {
+            drawTransformedRegion(ctx, img, nose, { x: nose.x + nose.w * 0.06, y: nose.y - nose.h * 0.03, w: nose.w * 0.88, h: nose.h * 1.06 }, 0.98, 'contrast(1.05) brightness(1.02)');
+            drawHighlight(ctx, nose.x + nose.w * 0.24, nose.y + nose.h * 0.05, nose.w * 0.52, nose.h * 0.80, 'rgba(255,255,255,.14)');
+          },
+          noseSlim() {
+            drawTransformedRegion(ctx, img, noseLow, { x: noseLow.x + noseLow.w * 0.09, y: noseLow.y - noseLow.h * 0.02, w: noseLow.w * 0.82, h: noseLow.h * 1.02 }, 0.98, 'contrast(1.06)');
+            drawHighlight(ctx, noseLow.x + noseLow.w * 0.16, noseLow.y + noseLow.h * 0.08, noseLow.w * 0.68, noseLow.h * 0.65, 'rgba(255,255,255,.10)');
+          },
+          noseTipRefine() {
+            drawTransformedRegion(ctx, img, noseTip, { x: noseTip.x + noseTip.w * 0.06, y: noseTip.y - noseTip.h * 0.10, w: noseTip.w * 0.86, h: noseTip.h * 0.98 }, 0.98, 'contrast(1.05) brightness(1.03)');
+            drawHighlight(ctx, noseTip.x + noseTip.w * 0.12, noseTip.y - noseTip.h * 0.05, noseTip.w * 0.70, noseTip.h * 0.80, 'rgba(255,255,255,.08)');
+          },
+          jawLift() {
+            drawTransformedRegion(ctx, img, jaw, { x: jaw.x + jaw.w * 0.03, y: jaw.y - jaw.h * 0.05, w: jaw.w * 0.94, h: jaw.h * 1.00 }, 0.96, 'contrast(1.02)');
+            drawHighlight(ctx, jaw.x + jaw.w * 0.10, jaw.y + jaw.h * 0.25, jaw.w * 0.80, jaw.h * 0.65, 'rgba(255,255,255,.08)');
+          },
+          chinReduce() {
+            drawTransformedRegion(ctx, img, chin, { x: chin.x + chin.w * 0.02, y: chin.y - chin.h * 0.08, w: chin.w * 0.96, h: chin.h * 0.88 }, 0.97, 'contrast(1.03) brightness(1.02)');
+            drawHighlight(ctx, chin.x + chin.w * 0.15, chin.y, chin.w * 0.70, chin.h * 0.75, 'rgba(255,255,255,.10)');
+          },
+          contourRefine() {
+            drawTransformedRegion(ctx, img, jaw, { x: jaw.x + jaw.w * 0.04, y: jaw.y - jaw.h * 0.03, w: jaw.w * 0.92, h: jaw.h * 1.00 }, 0.96, 'contrast(1.03)');
+            drawTransformedRegion(ctx, img, leftCheek, { x: leftCheek.x + leftCheek.w * 0.06, y: leftCheek.y - leftCheek.h * 0.02, w: leftCheek.w * 0.92, h: leftCheek.h * 1.00 }, 0.92, 'brightness(1.01)');
+            drawTransformedRegion(ctx, img, rightCheek, { x: rightCheek.x + rightCheek.w * 0.02, y: rightCheek.y - rightCheek.h * 0.02, w: rightCheek.w * 0.92, h: rightCheek.h * 1.00 }, 0.92, 'brightness(1.01)');
+          },
+          eyesOpen() {
+            drawTransformedRegion(ctx, img, leftEye, { x: leftEye.x - leftEye.w * 0.01, y: leftEye.y - leftEye.h * 0.02, w: leftEye.w * 1.05, h: leftEye.h * 1.14 }, 0.98, 'brightness(1.05) contrast(1.06)');
+            drawTransformedRegion(ctx, img, rightEye, { x: rightEye.x - rightEye.w * 0.01, y: rightEye.y - rightEye.h * 0.02, w: rightEye.w * 1.05, h: rightEye.h * 1.14 }, 0.98, 'brightness(1.05) contrast(1.06)');
+          },
+          underEyeBright() {
+            drawHighlight(ctx, leftUnderEye.x, leftUnderEye.y, leftUnderEye.w, leftUnderEye.h, 'rgba(255,255,255,.14)');
+            drawHighlight(ctx, rightUnderEye.x, rightUnderEye.y, rightUnderEye.w, rightUnderEye.h, 'rgba(255,255,255,.14)');
+            drawTransformedRegion(ctx, img, leftUnderEye, { x: leftUnderEye.x, y: leftUnderEye.y, w: leftUnderEye.w, h: leftUnderEye.h }, 0.18, 'blur(4px) brightness(1.12)');
+            drawTransformedRegion(ctx, img, rightUnderEye, { x: rightUnderEye.x, y: rightUnderEye.y, w: rightUnderEye.w, h: rightUnderEye.h }, 0.18, 'blur(4px) brightness(1.12)');
+          },
+          eyelidLine() {
+            this.eyesOpen();
+            drawHighlight(ctx, leftEye.x, leftEye.y, leftEye.w, leftEye.h, 'rgba(255,255,255,.06)');
+            drawHighlight(ctx, rightEye.x, rightEye.y, rightEye.w, rightEye.h, 'rgba(255,255,255,.06)');
+          },
+          cheekVolume() {
+            drawTransformedRegion(ctx, img, leftCheek, { x: leftCheek.x - leftCheek.w * 0.02, y: leftCheek.y - leftCheek.h * 0.02, w: leftCheek.w * 1.04, h: leftCheek.h * 1.05 }, 0.96, 'brightness(1.04)');
+            drawTransformedRegion(ctx, img, rightCheek, { x: rightCheek.x - rightCheek.w * 0.02, y: rightCheek.y - rightCheek.h * 0.02, w: rightCheek.w * 1.04, h: rightCheek.h * 1.05 }, 0.96, 'brightness(1.04)');
+            drawHighlight(ctx, leftCheek.x, leftCheek.y, leftCheek.w, leftCheek.h, 'rgba(255,255,255,.10)');
+            drawHighlight(ctx, rightCheek.x, rightCheek.y, rightCheek.w, rightCheek.h, 'rgba(255,255,255,.10)');
+          },
+          nasolabialSoft() {
+            drawTransformedRegion(ctx, img, nasoLeft, { x: nasoLeft.x, y: nasoLeft.y, w: nasoLeft.w, h: nasoLeft.h }, 0.16, 'blur(5px) brightness(1.12)');
+            drawTransformedRegion(ctx, img, nasoRight, { x: nasoRight.x, y: nasoRight.y, w: nasoRight.w, h: nasoRight.h }, 0.16, 'blur(5px) brightness(1.12)');
+            drawHighlight(ctx, nasoLeft.x, nasoLeft.y, nasoLeft.w, nasoLeft.h, 'rgba(255,255,255,.08)');
+            drawHighlight(ctx, nasoRight.x, nasoRight.y, nasoRight.w, nasoRight.h, 'rgba(255,255,255,.08)');
+          },
+          midLift() {
+            drawTransformedRegion(ctx, img, leftCheek, { x: leftCheek.x - leftCheek.w * 0.02, y: leftCheek.y - leftCheek.h * 0.05, w: leftCheek.w * 0.98, h: leftCheek.h * 1.02 }, 0.95, 'brightness(1.03)');
+            drawTransformedRegion(ctx, img, rightCheek, { x: rightCheek.x + rightCheek.w * 0.00, y: rightCheek.y - rightCheek.h * 0.05, w: rightCheek.w * 0.98, h: rightCheek.h * 1.02 }, 0.95, 'brightness(1.03)');
+            this.jawLift();
+          },
+          skinSmooth() {
+            drawTransformedRegion(ctx, img, fullFace, fullFace, 0.26, 'blur(3.8px) brightness(1.03) contrast(1.03)');
+          },
+          skinTone() {
+            drawTransformedRegion(ctx, img, fullFace, fullFace, 0.15, 'brightness(1.09) saturate(1.02)');
+            drawHighlight(ctx, fullFace.x + fullFace.w*0.08, fullFace.y + fullFace.h*0.05, fullFace.w*0.84, fullFace.h*0.72, 'rgba(255,255,255,.08)');
+          },
+          wrinkleSoft() {
+            drawTransformedRegion(ctx, img, forehead, forehead, 0.16, 'blur(3.6px) brightness(1.08)');
+            this.underEyeBright();
+          }
+        };
+
+        const procedureOps = {
+          '코 높이기': () => { ops.noseHeighten(); },
+          '콧볼 줄이기': () => { ops.noseSlim(); },
+          '코끝 정리': () => { ops.noseTipRefine(); },
+          '턱선 리프팅': () => { ops.jawLift(); },
+          '이중턱 개선': () => { ops.chinReduce(); },
+          '윤곽 정리': () => { ops.contourRefine(); },
+          '눈매 교정': () => { ops.eyesOpen(); },
+          '눈밑 개선': () => { ops.underEyeBright(); },
+          '쌍꺼풀 라인': () => { ops.eyelidLine(); },
+          '볼륨 보정': () => { ops.cheekVolume(); },
+          '팔자 개선': () => { ops.nasolabialSoft(); },
+          '탄력 리프팅': () => { ops.midLift(); },
+          '모공 개선': () => { ops.skinSmooth(); },
+          '톤 개선': () => { ops.skinTone(); },
+          '잔주름 개선': () => { ops.wrinkleSoft(); }
+        };
+
+        if (procedureOps[procedure]) procedureOps[procedure]();
+
+        // area-based subtle global finish
+        if (area === '피부결') ops.skinTone();
+        if (area === '코') drawHighlight(ctx, nose.x + nose.w*0.18, nose.y, nose.w*0.64, nose.h*0.86, 'rgba(255,255,255,.05)');
+        if (area === '턱선') drawHighlight(ctx, jaw.x + jaw.w*0.08, jaw.y + jaw.h*0.10, jaw.w*0.84, jaw.h*0.70, 'rgba(255,255,255,.05)');
+
+        return c.toDataURL('image/jpeg', 0.94);
+      }
+
+      function runSimulation() {
+        if (!sourceImage) return;
+        updateMeta();
+        const simulated = paintSimulation(sourceImage, selectedArea, selectedProcedure);
+        afterSide.innerHTML = `<span class="label">예상</span><img src="${simulated}" alt="예상 얼굴">`;
+        afterSide.animate([
+          { opacity: 0.65, transform: 'scale(0.985)' },
+          { opacity: 1, transform: 'scale(1)' }
+        ], { duration: 520, easing: 'ease-out' });
+        setStatus(`${selectedProcedure} 예상도를 생성했습니다`);
+      }
+
+      function setupChips(containerId, callback) {
+        const container = $(containerId);
+        container.addEventListener('click', (e) => {
+          const chip = e.target.closest('.chip');
+          if (!chip || !container.contains(chip)) return;
+          [...container.querySelectorAll('.chip')].forEach(el => el.classList.remove('active'));
+          chip.classList.add('active');
+          callback(chip.dataset.value);
+        });
+      }
+
+      openCamera.addEventListener('click', async () => {
+        setStatus('카메라 권한을 확인하는 중입니다');
+        await turnOnCamera();
+      });
+
+      startScan.addEventListener('click', async () => {
+        stopCurrentScan();
+
+        if (!stream) {
+          const opened = await turnOnCamera();
+          if (!opened) return;
+        }
+
+        let sec = 8;
+        let idx = 0;
+        timer.textContent = '00:08';
+        setStatus(guides[0].text);
+        setRing(guides[0].ring);
+        startScan.disabled = true;
+        startScan.textContent = '스캔 중...';
+
+        scanInterval = setInterval(async () => {
+          sec -= 1;
+          idx = Math.min(guides.length - 1, 8 - sec);
+          setStatus(guides[idx].text);
+          setRing(guides[idx].ring);
+          timer.textContent = `00:${String(Math.max(sec, 0)).padStart(2, '0')}`;
+
+          if (sec <= 0) {
+            stopCurrentScan();
+            try {
+              const img = await captureFrame(video, 'camera');
+              canvas.classList.remove('hidden');
+              video.classList.add('hidden');
+              fillFrames(img);
+              showComparison(img, null, false);
+              runSimulation();
+              setStatus('스캔 완료. 부위와 원하는 변화를 선택하세요');
+              setRing('완료');
+              timer.textContent = '완료';
+            } catch (e) {
+              setStatus('프레임 추출에 실패했습니다. 다시 촬영하거나 영상을 업로드해 주세요');
+              alert(`프레임 추출 실패: ${e.message}`);
+            } finally {
+              startScan.disabled = false;
+              startScan.textContent = '스캔 시작';
+            }
+          }
+        }, 1000);
+      });
+
+      uploadVideo.addEventListener('click', () => videoInput.click());
+
+      videoInput.addEventListener('change', async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        try {
+          stopCurrentScan();
+          stopStream();
+          currentMediaType = 'upload';
+          setStatus('업로드 영상에서 대표 프레임을 추출하는 중입니다');
+          setRing('분석중');
+
+          const url = URL.createObjectURL(file);
+          video.srcObject = null;
+          video.src = url;
+          video.controls = true;
+          video.muted = true;
+          video.playsInline = true;
+          video.classList.remove('hidden');
+          canvas.classList.add('hidden');
+          applyMirrorClass();
+
+          await waitForVideoReady(video);
+          const seekTime = Math.min(1, Math.max(0, (video.duration || 2) / 3));
+          await new Promise((resolve) => {
+            video.onseeked = resolve;
+            video.currentTime = seekTime;
+          });
+
+          const img = await captureFrame(video, 'upload');
+          fillFrames(img);
+          showComparison(img, null, false);
+          runSimulation();
+          canvas.classList.remove('hidden');
+          video.classList.add('hidden');
+          setStatus('대표 프레임 추출 완료. 부위와 원하는 변화를 선택하세요');
+          setRing('완료');
+          timer.textContent = '완료';
+          URL.revokeObjectURL(url);
+        } catch (err) {
+          setStatus('영상 분석에 실패했습니다. 다른 영상을 업로드해 주세요');
+          alert(`영상 업로드 실패: ${err.message}`);
+        }
+      });
+
+      setupChips('areas', (value) => {
+        selectedArea = value;
+        const list = procedureMap[value] || procedureMap['코'];
+        $('procedures').innerHTML = list.map((item, i) => `<div class="chip ${i === 0 ? 'active' : ''}" data-value="${item}">${item}</div>`).join('');
+        selectedProcedure = list[0];
+        updateMeta();
+        if (sourceImage) runSimulation();
+      });
+
+      setupChips('procedures', (value) => {
+        selectedProcedure = value;
+        updateMeta();
+        if (sourceImage) runSimulation();
+      });
+
+      generate.addEventListener('click', () => {
+        if (!capturedData || !sourceImage) {
+          alert('먼저 얼굴 스캔을 완료하거나 영상을 업로드해 주세요.');
+          return;
+        }
+        setStatus('AI 예상도를 생성하는 중입니다');
+        generate.disabled = true;
+        generate.textContent = '생성 중...';
+        window.setTimeout(() => {
+          runSimulation();
+          generate.disabled = false;
+          generate.textContent = 'AI 예상도 보기';
+        }, 280);
+      });
+
+      updateMeta();
+      applyMirrorClass();
+    });
+  </script>
+</body>
+</html>
