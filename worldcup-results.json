@@ -1,0 +1,100 @@
+{
+  "matches": [
+    {
+      "group": "I",
+      "home": "NOR",
+      "away": "FRA",
+      "homeScore": null,
+      "awayScore": null,
+      "status": "scheduled"
+    },
+    {
+      "group": "I",
+      "home": "SEN",
+      "away": "IRQ",
+      "homeScore": null,
+      "awayScore": null,
+      "status": "scheduled"
+    },
+    {
+      "group": "H",
+      "home": "URU",
+      "away": "ESP",
+      "homeScore": null,
+      "awayScore": null,
+      "status": "scheduled"
+    },
+    {
+      "group": "H",
+      "home": "CPV",
+      "away": "KSA",
+      "homeScore": null,
+      "awayScore": null,
+      "status": "scheduled"
+    },
+    {
+      "group": "G",
+      "home": "NZL",
+      "away": "BEL",
+      "homeScore": null,
+      "awayScore": null,
+      "status": "scheduled"
+    },
+    {
+      "group": "G",
+      "home": "EGY",
+      "away": "IRI",
+      "homeScore": null,
+      "awayScore": null,
+      "status": "scheduled"
+    },
+    {
+      "group": "L",
+      "home": "PAN",
+      "away": "ENG",
+      "homeScore": null,
+      "awayScore": null,
+      "status": "scheduled"
+    },
+    {
+      "group": "L",
+      "home": "CRO",
+      "away": "GHA",
+      "homeScore": null,
+      "awayScore": null,
+      "status": "scheduled"
+    },
+    {
+      "group": "K",
+      "home": "COL",
+      "away": "POR",
+      "homeScore": null,
+      "awayScore": null,
+      "status": "scheduled"
+    },
+    {
+      "group": "K",
+      "home": "COD",
+      "away": "UZB",
+      "homeScore": null,
+      "awayScore": null,
+      "status": "scheduled"
+    },
+    {
+      "group": "J",
+      "home": "JOR",
+      "away": "ARG",
+      "homeScore": null,
+      "awayScore": null,
+      "status": "scheduled"
+    },
+    {
+      "group": "J",
+      "home": "DZA",
+      "away": "AUT",
+      "homeScore": null,
+      "awayScore": null,
+      "status": "scheduled"
+    }
+  ]
+}
