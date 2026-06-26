@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>대한민국 32강 경우의 수 LIVE</title>
+  <style>
+    :root{
+      --bg:#07111f; --panel:#0d1b2f; --panel2:#13243d; --line:#223653;
+      --text:#edf5ff; --muted:#93a8c2; --blue:#5bbcff; --red:#ff5d73;
+      --green:#48d597; --yellow:#ffd166; --orange:#ff9f43;
+      --shadow:0 18px 60px rgba(0,0,0,.35); --r:22px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",Arial,sans-serif;background:radial-gradient(circle at top left,#123964 0,#07111f 40%,#040914 100%);color:var(--text)}
+    a{color:#9bd4ff} button,input,textarea,select{font:inherit}
+    .wrap{max-width:1240px;margin:0 auto;padding:28px 18px 50px}
+    .hero{display:grid;grid-template-columns:1.25fr .75fr;gap:18px;align-items:stretch;margin-bottom:18px}
+    .titleBox,.card,.panel{background:linear-gradient(180deg,rgba(19,36,61,.94),rgba(9,19,34,.96));border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+    .titleBox{padding:28px;position:relative;overflow:hidden}
+    .titleBox:after{content:"";position:absolute;right:-90px;top:-90px;width:260px;height:260px;background:radial-gradient(circle,rgba(91,188,255,.28),transparent 68%)}
+    h1{margin:0 0 12px;font-size:clamp(28px,4vw,48px);line-height:1.05;letter-spacing:-.04em}
+    .lead{color:var(--muted);font-size:16px;line-height:1.65;margin:0;max-width:780px}
+    .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+    .badge{border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.06);border-radius:999px;padding:8px 11px;color:#dbeafe;font-size:13px}
+    .scoreBox{padding:22px;display:flex;flex-direction:column;justify-content:space-between;gap:16px}
+    .bigProb{font-size:54px;line-height:1;font-weight:850;letter-spacing:-.05em}
+    .probSub{color:var(--muted);font-size:13px;line-height:1.5}
+    .statusPill{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:9px 12px;font-weight:800;background:rgba(72,213,151,.12);color:#9cf2c7;border:1px solid rgba(72,213,151,.28)}
+    .statusPill.risk{background:rgba(255,159,67,.12);color:#ffd09b;border-color:rgba(255,159,67,.35)}
+    .statusPill.out{background:rgba(255,93,115,.12);color:#ffb4c0;border-color:rgba(255,93,115,.35)}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0}
+    .card{padding:18px;min-height:128px}
+    .label{font-size:13px;color:var(--muted);margin-bottom:8px}
+    .value{font-size:30px;font-weight:850;letter-spacing:-.03em}.value small{font-size:16px;color:var(--muted);font-weight:700}
+    .note{font-size:13px;color:var(--muted);line-height:1.5;margin-top:8px}
+    .layout{display:grid;grid-template-columns:1fr 360px;gap:16px;align-items:start}
+    .panel{padding:18px;margin-bottom:16px;overflow:hidden}
+    h2{font-size:20px;letter-spacing:-.02em;margin:0 0 12px} h3{font-size:15px;color:#dbeafe;margin:18px 0 10px}
+    table{width:100%;border-collapse:collapse;border-spacing:0} th,td{padding:10px 9px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;font-size:13px;vertical-align:middle} th{color:#a8bdd6;font-weight:700;background:rgba(255,255,255,.03)}
+    tr.korea{background:rgba(91,188,255,.12)} tr.cut{box-shadow:inset 0 -2px 0 rgba(255,209,102,.8)}
+    .tag{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:800}
+    .tag.in{background:rgba(72,213,151,.14);color:#91efc0}.tag.out{background:rgba(255,93,115,.14);color:#ffadbb}.tag.wait{background:rgba(255,209,102,.15);color:#ffe29a}.tag.live{background:rgba(91,188,255,.14);color:#bde6ff}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 14px}.tab{border:1px solid var(--line);background:rgba(255,255,255,.04);color:#cfe3fa;border-radius:999px;padding:8px 11px;cursor:pointer}.tab.active{background:#eaf6ff;color:#06111f;border-color:#eaf6ff;font-weight:850}
+    .scenario{display:grid;gap:10px}.scenario .item{border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:14px;background:rgba(255,255,255,.04);line-height:1.55;color:#dbeafe}.item strong{color:#fff}
+    .inputRow{display:grid;grid-template-columns:1fr 74px 74px;gap:8px;align-items:center;border-bottom:1px solid rgba(255,255,255,.08);padding:9px 0}.inputRow span{font-size:13px;color:#dbeafe}.scoreInput{width:100%;background:#071323;border:1px solid var(--line);border-radius:10px;color:#fff;padding:9px;text-align:center}
+    .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btn{background:#eaf6ff;color:#06111f;border:0;border-radius:12px;padding:10px 12px;font-weight:850;cursor:pointer}.btn.secondary{background:rgba(255,255,255,.08);color:#dbeafe;border:1px solid rgba(255,255,255,.13)}.btn.warn{background:rgba(255,209,102,.18);color:#ffe29a;border:1px solid rgba(255,209,102,.28)}
+    .urlBox{display:grid;grid-template-columns:1fr auto;gap:8px}.urlBox input,textarea{width:100%;background:#071323;border:1px solid var(--line);border-radius:12px;color:#fff;padding:11px} textarea{min-height:128px;resize:vertical;font-size:12px;line-height:1.5}
+    .mini{font-size:12px;color:var(--muted);line-height:1.45}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    .bar{height:8px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:10px}.bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:999px;transition:.35s}
+    .footer{color:#8096b2;font-size:12px;line-height:1.6;margin-top:18px}.hidden{display:none!important}
+    @media(max-width:980px){.hero,.layout{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}.scoreBox{min-height:220px}}@media(max-width:560px){.grid{grid-template-columns:1fr}.urlBox{grid-template-columns:1fr}.bigProb{font-size:42px}th,td{font-size:12px;padding:9px 6px}.wrap{padding:18px 12px 36px}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div class="titleBox">
+      <h1>대한민국 32강<br>경우의 수 LIVE</h1>
+      <p class="lead">FIFA 월드컵 조별 공식 경기결과를 기준으로 12개 조 3위 팀을 자동 정렬하고, 대한민국이 32강에 진출할 수 있는 조건과 예상 확률을 계산합니다. 남은 경기는 점수를 입력하거나 JSON 데이터로 갱신할 수 있습니다.</p>
+      <div class="badges">
+        <span class="badge">기준: 조 1, 2위 + 3위 상위 8팀 진출</span>
+        <span class="badge">대한민국: A조 3위 확정</span>
+        <span class="badge" id="updatedAt">내장 데이터: 2026.06.26 16:38 KST · 순위계산 수정본</span>
+      </div>
+    </div>
+    <div class="card scoreBox">
+      <div><span id="statusPill" class="statusPill">계산 중</span></div>
+      <div>
+        <div class="label">예상 진출 확률</div>
+        <div class="bigProb" id="probability">-</div>
+        <div class="bar"><i id="probBar"></i></div>
+        <div class="probSub" id="probSub">남은 경기 기본 예측값으로 몬테카를로 시뮬레이션을 돌립니다.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card"><div class="label">한국 현재 성적</div><div class="value" id="korRecord">-</div><div class="note" id="korNote">-</div></div>
+    <div class="card"><div class="label">3위 순위 내 한국 위치</div><div class="value" id="korRank">-</div><div class="note">상위 8위 안이면 32강</div></div>
+    <div class="card"><div class="label">한국보다 앞선 3위 팀</div><div class="value" id="aheadCount">-</div><div class="note">8팀 이상이면 탈락권</div></div>
+    <div class="card"><div class="label">핵심 조건</div><div class="value" id="neededCount">-</div><div class="note">남은 조 3위가 한국보다 앞설 수 있는 최대치</div></div>
+  </section>
+
+  <main class="layout">
+    <div>
+      <section class="panel">
+        <h2>3위 팀 실시간 순위</h2>
+        <div class="mini">동률의 마지막 단계인 페어플레이/추첨은 자동 판정하지 않고 “동률 주의”로 표시합니다.</div>
+        <div style="overflow:auto;margin-top:12px"><table id="thirdTable"></table></div>
+      </section>
+
+      <section class="panel">
+        <h2>대한민국 경우의 수 요약</h2>
+        <div class="scenario" id="scenarioBox"></div>
+      </section>
+
+      <section class="panel">
+        <h2>조별 순위</h2>
+        <div class="tabs" id="groupTabs"></div>
+        <div style="overflow:auto"><table id="groupTable"></table></div>
+      </section>
+    </div>
+
+    <aside>
+      <section class="panel">
+        <h2>남은 경기 점수 입력</h2>
+        <div class="mini">실제 결과가 나오면 점수만 넣고 “반영”을 누르세요. 빈칸은 시뮬레이션 대상으로 남습니다.</div>
+        <div id="scoreInputs"></div>
+        <div class="btns">
+          <button class="btn" onclick="applyManualScores()">점수 반영</button>
+          <button class="btn secondary" onclick="resetData()">초기화</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>실시간 데이터 연결</h2>
+        <div class="mini">네이버 검색결과 페이지는 브라우저에서 직접 fetch가 막힐 수 있습니다. Cloudflare Worker, 사내 API, GitHub raw JSON처럼 CORS 허용 JSON URL을 넣으면 자동 갱신됩니다.</div>
+        <div class="urlBox" style="margin-top:10px">
+          <input id="jsonUrl" placeholder="https://.../worldcup-results.json" />
+          <button class="btn" onclick="loadJsonUrl()">불러오기</button>
+        </div>
+        <div class="btns">
+          <button class="btn secondary" onclick="window.open('https://search.naver.com/search.naver?where=nexearch&query=%EC%9B%94%EB%93%9C%EC%BB%B5','_blank')">네이버 결과 열기</button>
+          <button class="btn secondary" onclick="copySchema()">JSON 형식 복사</button>
+        </div>
+        <h3>JSON 붙여넣기</h3>
+        <textarea id="jsonPaste" placeholder='{"matches":[{"group":"A","home":"RSA","away":"KOR","homeScore":1,"awayScore":0,"status":"complete"}]}'></textarea>
+        <div class="btns"><button class="btn secondary" onclick="loadJsonPaste()">붙여넣은 데이터 반영</button></div>
+      </section>
+
+      <section class="panel">
+        <h2>확률 모델</h2>
+        <div class="mini">확률은 FIFA 공식값이 아니라 남은 경기 예측값 기반 추정치입니다. 공식 결과가 늘어날수록 확률은 0% 또는 100%로 수렴합니다.</div>
+        <div class="btns">
+          <button class="btn warn" onclick="runSimulation(true)">확률 다시 계산</button>
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <div class="footer">
+    내장 경기결과는 2026년 6월 26일 16:38 KST 기준 스냅샷입니다. 예정 경기는 0-0으로 처리하지 않고, 실제 결과 입력 전까지 미반영합니다. 실제 운영 시에는 FIFA 공식 결과 또는 검증된 스포츠 데이터 API를 JSON으로 변환해 연결하세요. 네이버 검색결과 URL은 참고용 링크로 남겨두었습니다.
+  </div>
+</div>
+<script>
+const TEAMS = {
+ A:[['MEX','멕시코'],['RSA','남아공'],['KOR','대한민국'],['CZE','체코']],
+ B:[['CAN','캐나다'],['BIH','보스니아 헤르체고비나'],['QAT','카타르'],['SUI','스위스']],
+ C:[['BRA','브라질'],['MAR','모로코'],['HTI','아이티'],['SCO','스코틀랜드']],
+ D:[['USA','미국'],['PAR','파라과이'],['AUS','호주'],['TUR','튀르키예']],
+ E:[['GER','독일'],['CUW','퀴라소'],['CIV','코트디부아르'],['ECU','에콰도르']],
+ F:[['NED','네덜란드'],['JPN','일본'],['SWE','스웨덴'],['TUN','튀니지']],
+ G:[['BEL','벨기에'],['EGY','이집트'],['IRI','이란'],['NZL','뉴질랜드']],
+ H:[['ESP','스페인'],['CPV','카보베르데'],['KSA','사우디아라비아'],['URU','우루과이']],
+ I:[['FRA','프랑스'],['SEN','세네갈'],['IRQ','이라크'],['NOR','노르웨이']],
+ J:[['ARG','아르헨티나'],['DZA','알제리'],['AUT','오스트리아'],['JOR','요르단']],
+ K:[['POR','포르투갈'],['COD','DR콩고'],['UZB','우즈베키스탄'],['COL','콜롬비아']],
+ L:[['ENG','잉글랜드'],['CRO','크로아티아'],['GHA','가나'],['PAN','파나마']]
+};
+const ODDS = {
+ 'NOR-FRA':[28,27,45], 'SEN-IRQ':[48,27,25], 'URU-ESP':[23,27,50], 'CPV-KSA':[38,30,32],
+ 'NZL-BEL':[18,24,58], 'EGY-IRI':[35,31,34], 'PAN-ENG':[10,18,72], 'CRO-GHA':[42,29,29],
+ 'COL-POR':[27,28,45], 'COD-UZB':[38,30,32], 'JOR-ARG':[9,16,75], 'DZA-AUT':[29,29,42]
+};
+const BASE_MATCHES = [
+ m('A','MEX','RSA',2,0),m('A','KOR','CZE',2,1),m('B','CAN','BIH',1,1),m('D','USA','PAR',4,1),
+ m('B','QAT','SUI',1,1),m('C','BRA','MAR',1,1),m('C','HTI','SCO',0,1),m('D','AUS','TUR',2,0),
+ m('E','GER','CUW',7,1),m('F','NED','JPN',2,2),m('E','CIV','ECU',1,0),m('F','SWE','TUN',5,1),
+ m('H','ESP','CPV',0,0),m('G','BEL','EGY',1,1),m('H','KSA','URU',1,1),m('G','IRI','NZL',2,2),
+ m('I','FRA','SEN',3,1),m('I','IRQ','NOR',1,4),m('J','ARG','DZA',3,0),m('J','AUT','JOR',3,1),
+ m('K','POR','COD',1,1),m('L','ENG','CRO',4,2),m('L','GHA','PAN',1,0),m('K','UZB','COL',1,3),
+ m('A','CZE','RSA',1,1),m('B','SUI','BIH',4,1),m('B','CAN','QAT',6,0),m('A','MEX','KOR',1,0),
+ m('D','USA','AUS',2,0),m('C','SCO','MAR',0,1),m('C','BRA','HTI',3,0),m('D','TUR','PAR',0,1),
+ m('F','NED','SWE',5,1),m('E','GER','CIV',2,1),m('E','ECU','CUW',0,0),m('F','TUN','JPN',0,4),
+ m('H','ESP','KSA',4,0),m('G','BEL','IRI',0,0),m('H','URU','CPV',2,2),m('G','NZL','EGY',1,3),
+ m('J','ARG','AUT',2,0),m('I','FRA','IRQ',3,0),m('I','NOR','SEN',3,2),m('J','JOR','DZA',1,2),
+ m('K','POR','UZB',5,0),m('L','ENG','GHA',0,0),m('L','PAN','CRO',0,1),m('K','COL','COD',1,0),
+ m('B','SUI','CAN',2,1),m('B','BIH','QAT',3,1),m('C','SCO','BRA',0,3),m('C','MAR','HTI',4,2),
+ m('A','CZE','MEX',0,3),m('A','RSA','KOR',1,0),m('E','ECU','GER',2,1),m('E','CUW','CIV',0,2),
+ m('F','TUN','NED',1,3),m('F','JPN','SWE',1,1),m('D','TUR','USA',3,2),m('D','PAR','AUS',0,0),
+ m('I','NOR','FRA',null,null,'scheduled'),m('I','SEN','IRQ',null,null,'scheduled'),m('H','URU','ESP',null,null,'scheduled'),m('H','CPV','KSA',null,null,'scheduled'),
+ m('G','NZL','BEL',null,null,'scheduled'),m('G','EGY','IRI',null,null,'scheduled'),m('L','PAN','ENG',null,null,'scheduled'),m('L','CRO','GHA',null,null,'scheduled'),
+ m('K','COL','POR',null,null,'scheduled'),m('K','COD','UZB',null,null,'scheduled'),m('J','JOR','ARG',null,null,'scheduled'),m('J','DZA','AUT',null,null,'scheduled')
+];
+function m(group,home,away,homeScore,awayScore,status){return {group,home,away,homeScore,awayScore,status:status || 'complete',odds:ODDS[home+'-'+away] || [33,34,33]}}
+let matches = JSON.parse(JSON.stringify(BASE_MATCHES));
+let selectedGroup = 'A';
+function hasScore(v){ return v !== null && v !== undefined && v !== '' && Number.isFinite(Number(v)); }
+function nameOf(code){ for(const g in TEAMS){ const t=TEAMS[g].find(x=>x[0]===code); if(t) return t[1]; } return code; }
+function initStats(){ const stats={}; Object.entries(TEAMS).forEach(([g,arr])=>arr.forEach(([code,name])=>stats[code]={code,name,group:g,p:0,w:0,d:0,l:0,gf:0,ga:0,gd:0,pts:0})); return stats; }
+function getStandings(inputMatches=matches){
+ const stats=initStats();
+ inputMatches.forEach(x=>{ if(!hasScore(x.homeScore)||!hasScore(x.awayScore)) return; const hs=Number(x.homeScore), as=Number(x.awayScore); const h=stats[x.home], a=stats[x.away]; if(!h||!a) return; h.p++; a.p++; h.gf+=hs; h.ga+=as; a.gf+=as; a.ga+=hs; h.gd=h.gf-h.ga; a.gd=a.gf-a.ga; if(hs>as){h.w++;a.l++;h.pts+=3}else if(hs<as){a.w++;h.l++;a.pts+=3}else{h.d++;a.d++;h.pts++;a.pts++} });
+ const tables={}; Object.keys(TEAMS).forEach(g=>{ tables[g]=TEAMS[g].map(t=>stats[t[0]]).sort((a,b)=>cmpTeam(b,a)); }); return tables;
+}
+function cmpTeam(a,b){ return (a.pts-b.pts)||(a.gd-b.gd)||(a.gf-b.gf)||b.code.localeCompare(a.code); }
+function cmpThird(a,b){ return (a.pts-b.pts)||(a.gd-b.gd)||(a.gf-b.gf); }
+function thirdRanking(tables){ return Object.values(tables).map(rows=>rows[2]).sort((a,b)=>cmpThird(b,a)||a.group.localeCompare(b.group)); }
+function koreaState(inputMatches=matches){
+ const tables=getStandings(inputMatches); const thirds=thirdRanking(tables); const kor=thirds.find(x=>x.code==='KOR');
+ const ahead=thirds.filter(x=>x.code!=='KOR' && cmpThird(x,kor)>0).length; const tied=thirds.filter(x=>x.code!=='KOR' && cmpThird(x,kor)===0).length; const rank=thirds.findIndex(x=>x.code==='KOR')+1;
+ let status='진출권', cls=''; let probTie=1;
+ if(ahead>7){status='탈락권'; cls='out'; probTie=0}
+ else if(ahead+tied>=8){status='동률 변수'; cls='risk'; probTie=(8-ahead)/(tied+1)}
+ return {tables,thirds,kor,ahead,tied,rank,status,cls,probTie};
+}
+function render(){
+ const st=koreaState(); const k=st.kor;
+ document.getElementById('statusPill').textContent=st.status; document.getElementById('statusPill').className='statusPill '+st.cls;
+ document.getElementById('korRecord').innerHTML=`${k.pts}<small>점</small> / GD ${k.gd>0?'+':''}${k.gd}`;
+ document.getElementById('korNote').textContent=`${k.w}승 ${k.d}무 ${k.l}패, ${k.gf}득점 ${k.ga}실점`;
+ document.getElementById('korRank').innerHTML=`${st.rank}<small>위</small>`; document.getElementById('aheadCount').innerHTML=`${st.ahead}<small>팀</small>`;
+ const remainAllowance=Math.max(0,7 - st.ahead); document.getElementById('neededCount').innerHTML=`${remainAllowance}<small>팀 이하</small>`;
+ renderThird(st); renderScenarios(st); renderTabs(st.tables); renderGroup(st.tables[selectedGroup]); renderScoreInputs(); runSimulation(false);
+}
+function renderThird(st){
+ let html='<thead><tr><th>순위</th><th>조</th><th>팀</th><th>승점</th><th>득실</th><th>득점</th><th>상태</th></tr></thead><tbody>';
+ st.thirds.forEach((r,i)=>{ const c=r.code==='KOR'?'korea':(i===7?'cut':''); const tag=i<8?'in':'out'; const txt=r.code==='KOR'?'대한민국':(i<8?'진출권':'탈락권'); html+=`<tr class="${c}"><td>${i+1}</td><td>${r.group}</td><td><strong>${r.name}</strong> <span class="mini mono">${r.code}</span></td><td>${r.pts}</td><td>${r.gd>0?'+':''}${r.gd}</td><td>${r.gf}</td><td><span class="tag ${tag}">${txt}</span></td></tr>`; });
+ html+='</tbody>'; document.getElementById('thirdTable').innerHTML=html;
+}
+function renderScenarios(st){
+ const completedGroups=['A','B','C','D','E','F'].filter(g=>matches.filter(x=>x.group===g && hasScore(x.homeScore) && hasScore(x.awayScore)).length===6);
+ const unfinished=Object.keys(TEAMS).filter(g=>matches.filter(x=>x.group===g && hasScore(x.homeScore) && hasScore(x.awayScore)).length<6);
+ const box=document.getElementById('scenarioBox');
+ box.innerHTML=`
+ <div class="item"><strong>현재 구조</strong><br>대한민국은 A조 3위, 3점 / 득실 -1 / 2득점입니다. 3위 상위 8팀 안에 들어야 32강에 갑니다.</div>
+ <div class="item"><strong>안전선</strong><br>한국보다 앞서는 3위 팀이 총 7팀 이하이면 진출권입니다. 현재 기준 한국보다 앞선 3위 팀은 <strong>${st.ahead}팀</strong>입니다.</div>
+ <div class="item"><strong>탈락 시나리오</strong><br>남은 조에서 한국보다 앞서는 3위 팀이 추가로 많이 나오면 위험합니다. 특히 4점 이상 3위 팀은 한국보다 무조건 앞섭니다.</div>
+ <div class="item"><strong>동률 주의</strong><br>3점, 득실 -1, 2득점까지 같으면 페어플레이 등 추가 기준이 필요합니다. 이 페이지는 그 경우를 별도 변수로 처리합니다.</div>
+ <div class="item"><strong>남은 조</strong><br>${unfinished.length?unfinished.join(', ')+'조 결과가 아직 확정 전입니다.':'모든 조별리그가 반영되었습니다.'}</div>`;
+}
+function renderTabs(tables){
+ const el=document.getElementById('groupTabs'); el.innerHTML=Object.keys(tables).map(g=>`<button class="tab ${g===selectedGroup?'active':''}" onclick="selectedGroup='${g}'; render()">${g}조</button>`).join('');
+}
+function renderGroup(rows){
+ let html='<thead><tr><th>순위</th><th>팀</th><th>경기</th><th>승점</th><th>승</th><th>무</th><th>패</th><th>득실</th><th>득점</th></tr></thead><tbody>';
+ rows.forEach((r,i)=>{ html+=`<tr class="${r.code==='KOR'?'korea':''}"><td>${i+1}</td><td><strong>${r.name}</strong> <span class="mini mono">${r.code}</span></td><td>${r.p}</td><td>${r.pts}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td>${r.gd>0?'+':''}${r.gd}</td><td>${r.gf}</td></tr>`; });
+ document.getElementById('groupTable').innerHTML=html+'</tbody>';
+}
+function renderScoreInputs(){
+ const el=document.getElementById('scoreInputs'); const scheduled=matches.filter(x=>!hasScore(x.homeScore)||!hasScore(x.awayScore));
+ if(!scheduled.length){el.innerHTML='<div class="mini">남은 경기가 없습니다.</div>'; return;}
+ el.innerHTML=scheduled.map((x,i)=>`<div class="inputRow"><span>${x.group}조 ${nameOf(x.home)} vs ${nameOf(x.away)}</span><input class="scoreInput" data-i="${i}" data-side="h" placeholder="${x.home}"/><input class="scoreInput" data-i="${i}" data-side="a" placeholder="${x.away}"/></div>`).join('');
+}
+function applyManualScores(){
+ const scheduled=matches.filter(x=>!hasScore(x.homeScore)||!hasScore(x.awayScore));
+ document.querySelectorAll('.scoreInput').forEach(inp=>{ const game=scheduled[+inp.dataset.i]; if(!game) return; const val=inp.value.trim(); if(val==='') return; if(inp.dataset.side==='h') game.homeScore=+val; else game.awayScore=+val; if(hasScore(game.homeScore)&&hasScore(game.awayScore)) game.status='complete'; });
+ document.getElementById('updatedAt').textContent='수동 업데이트: '+new Date().toLocaleString('ko-KR'); render();
+}
+function resetData(){ matches=JSON.parse(JSON.stringify(BASE_MATCHES)); document.getElementById('updatedAt').textContent='내장 데이터: 2026.06.26 16:38 KST · 순위계산 수정본'; render(); }
+function normalizeIncoming(data){
+ const arr=Array.isArray(data)?data:(data.matches||[]); arr.forEach(x=>{ const g=x.group; const home=(x.home||x.homeCode||'').toUpperCase(); const away=(x.away||x.awayCode||'').toUpperCase(); const game=matches.find(m=>m.group===g && ((m.home===home&&m.away===away)||(m.home===away&&m.away===home))); if(!game) return; const hs=hasScore(x.homeScore)?Number(x.homeScore):null; const as=hasScore(x.awayScore)?Number(x.awayScore):null; if(hs!==null && as!==null){ if(game.home===home){game.homeScore=hs; game.awayScore=as}else{game.homeScore=as; game.awayScore=hs} game.status=x.status||'complete'; } });
+}
+async function loadJsonUrl(){
+ const url=document.getElementById('jsonUrl').value.trim(); if(!url) return alert('JSON URL을 입력해주세요.');
+ try{ const res=await fetch(url,{cache:'no-store'}); const data=await res.json(); normalizeIncoming(data); document.getElementById('updatedAt').textContent='JSON 업데이트: '+new Date().toLocaleString('ko-KR'); render(); }
+ catch(e){ alert('불러오기 실패: CORS 또는 JSON 형식을 확인해주세요.'); console.error(e); }
+}
+function loadJsonPaste(){ try{ normalizeIncoming(JSON.parse(document.getElementById('jsonPaste').value)); document.getElementById('updatedAt').textContent='붙여넣기 업데이트: '+new Date().toLocaleString('ko-KR'); render(); }catch(e){ alert('JSON 형식이 올바르지 않습니다.'); }}
+function copySchema(){ const schema={matches:[{group:'A',home:'RSA',away:'KOR',homeScore:1,awayScore:0,status:'complete'}]}; navigator.clipboard.writeText(JSON.stringify(schema,null,2)); alert('JSON 형식을 복사했습니다.'); }
+function rng(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; let t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }}
+function simScore(match,rand){ const [hw,dr,aw]=match.odds||[33,34,33]; const r=rand()*100; const loser=()=>[0,1,2][pick(rand,[45,40,15])]; const margin=()=>[1,2,3][pick(rand,[65,25,10])]; if(r<hw){const l=loser();return [l+margin(),l]} if(r<hw+dr){const g=[0,1,2,3][pick(rand,[32,38,22,8])];return [g,g]} const l=loser();return [l,l+margin()]; }
+function pick(rand,weights){ const s=weights.reduce((a,b)=>a+b,0); let r=rand()*s; for(let i=0;i<weights.length;i++){r-=weights[i]; if(r<=0)return i} return weights.length-1; }
+function qualifyProbFor(inputMatches){ const st=koreaState(inputMatches); if(st.ahead>7) return 0; if(st.ahead+st.tied<8) return 1; return Math.max(0,Math.min(1,(8-st.ahead)/(st.tied+1))); }
+function runSimulation(force){
+ const pending=matches.filter(x=>!hasScore(x.homeScore)||!hasScore(x.awayScore)); const out=document.getElementById('probability'); const sub=document.getElementById('probSub'); const bar=document.getElementById('probBar');
+ if(!pending.length){ const p=qualifyProbFor(matches)*100; out.textContent=p.toFixed(1)+'%'; sub.textContent='모든 조별리그 결과가 반영된 상태입니다.'; bar.style.width=p+'%'; return; }
+ const N=force?30000:12000; let score=0; const dist={}; const rand=rng(20260626 + pending.length*97 + matches.filter(x=>hasScore(x.homeScore)&&hasScore(x.awayScore)).length);
+ for(let i=0;i<N;i++){ const copy=matches.map(x=>({...x})); copy.forEach(x=>{ if(!hasScore(x.homeScore)||!hasScore(x.awayScore)){ const s=simScore(x,rand); x.homeScore=s[0]; x.awayScore=s[1]; }}); const st=koreaState(copy); score+=qualifyProbFor(copy); dist[st.ahead]=(dist[st.ahead]||0)+1; }
+ const p=score/N*100; out.textContent=p.toFixed(1)+'%'; sub.textContent=`남은 ${pending.length}경기 예측 시뮬레이션 ${N.toLocaleString('ko-KR')}회 기준입니다.`; bar.style.width=Math.max(0,Math.min(100,p))+'%';
+}
+render();
+</script>
+</body>
+</html>
