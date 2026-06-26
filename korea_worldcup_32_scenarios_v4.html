@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>대한민국 32강 경우의 수 실시간 계산기 v4</title>
+  <style>
+    :root{
+      --bg:#07111f;
+      --panel:#101d31;
+      --panel2:#14243b;
+      --line:#253a5b;
+      --text:#eef5ff;
+      --muted:#9fb2d0;
+      --good:#4ade80;
+      --warn:#facc15;
+      --bad:#fb7185;
+      --blue:#60a5fa;
+      --chip:#1d3354;
+      --white:#fff;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(96,165,250,.24), transparent 36%),
+        radial-gradient(circle at bottom right, rgba(74,222,128,.14), transparent 34%),
+        var(--bg);
+      color:var(--text);
+    }
+    header{
+      padding:34px 20px 18px;
+      max-width:1180px;
+      margin:0 auto;
+    }
+    h1{
+      margin:0 0 10px;
+      font-size:clamp(26px,4vw,44px);
+      letter-spacing:-.04em;
+      line-height:1.08;
+    }
+    .subtitle{
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.55;
+      max-width:900px;
+    }
+    main{
+      max-width:1180px;
+      margin:0 auto;
+      padding:0 20px 48px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:16px;
+    }
+    @media(max-width:900px){.grid{grid-template-columns:1fr}}
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015)), var(--panel);
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:18px;
+      box-shadow:0 18px 50px rgba(0,0,0,.22);
+    }
+    .card h2{
+      margin:0 0 12px;
+      font-size:18px;
+      letter-spacing:-.02em;
+    }
+    .heroStats{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap:12px;
+      margin-top:16px;
+    }
+    @media(max-width:760px){.heroStats{grid-template-columns:repeat(2,1fr)}}
+    .stat{
+      background:var(--panel2);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+      min-height:95px;
+    }
+    .stat .label{font-size:12px;color:var(--muted);margin-bottom:8px}
+    .stat .value{font-size:27px;font-weight:800;letter-spacing:-.03em}
+    .stat .note{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.35}
+    .statusBadge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border-radius:999px;
+      padding:8px 12px;
+      font-weight:700;
+      font-size:13px;
+      background:rgba(250,204,21,.12);
+      color:var(--warn);
+      border:1px solid rgba(250,204,21,.3);
+    }
+    .statusBadge.good{
+      background:rgba(74,222,128,.12);
+      color:var(--good);
+      border-color:rgba(74,222,128,.3);
+    }
+    .statusBadge.bad{
+      background:rgba(251,113,133,.12);
+      color:var(--bad);
+      border-color:rgba(251,113,133,.3);
+    }
+    .inputRow{
+      display:flex;
+      gap:8px;
+      margin:10px 0;
+    }
+    .inputRow input{
+      flex:1;
+      min-width:0;
+      background:#071426;
+      border:1px solid var(--line);
+      color:var(--text);
+      border-radius:12px;
+      padding:12px 13px;
+      outline:none;
+    }
+    button{
+      border:0;
+      border-radius:12px;
+      padding:11px 14px;
+      background:var(--blue);
+      color:#06101f;
+      font-weight:800;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    button.secondary{
+      background:var(--chip);
+      color:var(--text);
+      border:1px solid var(--line);
+    }
+    button.warn{
+      background:var(--warn);
+      color:#111827;
+    }
+    button:disabled{opacity:.55;cursor:not-allowed}
+    textarea{
+      width:100%;
+      min-height:140px;
+      resize:vertical;
+      background:#071426;
+      border:1px solid var(--line);
+      color:var(--text);
+      border-radius:14px;
+      padding:13px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size:12px;
+      outline:none;
+    }
+    .small{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+    }
+    .log{
+      background:#071426;
+      border:1px dashed var(--line);
+      border-radius:14px;
+      padding:12px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.55;
+      white-space:pre-wrap;
+      max-height:155px;
+      overflow:auto;
+    }
+    .pillWrap{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+    .pill{
+      display:inline-flex;
+      gap:6px;
+      align-items:center;
+      padding:7px 10px;
+      border-radius:999px;
+      background:var(--chip);
+      color:var(--muted);
+      border:1px solid var(--line);
+      font-size:12px;
+    }
+    .pill b{color:var(--text)}
+    table{
+      width:100%;
+      border-collapse:collapse;
+      overflow:hidden;
+      font-size:13px;
+    }
+    th,td{
+      padding:10px 8px;
+      border-bottom:1px solid rgba(37,58,91,.75);
+      text-align:right;
+      white-space:nowrap;
+    }
+    th:first-child,td:first-child{text-align:left}
+    th{color:var(--muted);font-weight:700;background:rgba(255,255,255,.025)}
+    tr.korea{background:rgba(96,165,250,.13)}
+    tr.safe td:first-child::before{content:"✅ ";font-size:12px}
+    tr.danger td:first-child::before{content:"⚠️ ";font-size:12px}
+    tr.out td:first-child::before{content:"⬇️ ";font-size:12px}
+    .tables{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:16px;
+      margin-top:16px;
+    }
+    .tabs{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      margin:0 0 10px;
+    }
+    .tab{
+      background:var(--chip);
+      color:var(--muted);
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:7px 11px;
+      cursor:pointer;
+      font-size:12px;
+      font-weight:700;
+    }
+    .tab.active{
+      background:var(--blue);
+      color:#07111f;
+      border-color:transparent;
+    }
+    .notice{
+      margin-top:10px;
+      background:rgba(96,165,250,.1);
+      border:1px solid rgba(96,165,250,.22);
+      border-radius:14px;
+      padding:12px;
+      color:#dbeafe;
+      font-size:13px;
+      line-height:1.5;
+    }
+    .warnBox{
+      background:rgba(250,204,21,.1);
+      border-color:rgba(250,204,21,.28);
+      color:#fef3c7;
+    }
+    .badBox{
+      background:rgba(251,113,133,.1);
+      border-color:rgba(251,113,133,.28);
+      color:#ffe4e6;
+    }
+    .sources{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+    .sources a{
+      color:#dbeafe;
+      text-decoration:none;
+      background:var(--chip);
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:8px 11px;
+      font-size:12px;
+      font-weight:700;
+    }
+    .progress{
+      height:12px;
+      background:#071426;
+      border-radius:999px;
+      border:1px solid var(--line);
+      overflow:hidden;
+      margin-top:8px;
+    }
+    .bar{
+      height:100%;
+      width:0;
+      background:linear-gradient(90deg, var(--blue), var(--good));
+      transition:.35s;
+    }
+    .footerNote{
+      margin-top:20px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.6;
+    }
+    .matchEditor{
+      display:grid;
+      grid-template-columns: repeat(6, minmax(0,1fr));
+      gap:8px;
+      align-items:end;
+      margin-top:10px;
+    }
+    @media(max-width:780px){.matchEditor{grid-template-columns:1fr 1fr}}
+    select,.num{
+      width:100%;
+      background:#071426;
+      border:1px solid var(--line);
+      color:var(--text);
+      border-radius:12px;
+      padding:10px;
+      outline:none;
+    }
+    .fieldLabel{font-size:11px;color:var(--muted);margin-bottom:4px}
+    .hidden{display:none !important}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>대한민국 32강 경우의 수 계산기 ⚽</h1>
+    <div class="subtitle">
+      조별 경기결과를 바탕으로 각 조 3위 순위를 계산합니다.
+      한국은 조 A 3위 확정 상태이며, 12개 조 3위 중 상위 8팀 안에 들어야 32강에 진출합니다.
+    </div>
+    <div class="sources">
+      <a href="https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026" target="_blank" rel="noreferrer">FIFA 공식 페이지</a>
+      <a href="https://search.naver.com/search.naver?where=nexearch&query=%EC%9B%94%EB%93%9C%EC%BB%B5" target="_blank" rel="noreferrer">네이버 월드컵 검색</a>
+      <a id="rawOpenLink" href="https://raw.githubusercontent.com/leebj920-coder/storage/Worldcup/worldcup-results.json" target="_blank" rel="noreferrer">현재 JSON 열기</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="grid">
+      <div class="card">
+        <div id="mainBadge" class="statusBadge">계산 대기</div>
+        <div class="heroStats">
+          <div class="stat">
+            <div class="label">한국의 현재 조 3위 순위</div>
+            <div class="value" id="korRank">-위</div>
+            <div class="note" id="korRankNote">상위 8팀 진출</div>
+          </div>
+          <div class="stat">
+            <div class="label">한국 성적</div>
+            <div class="value" id="korRecord">3점</div>
+            <div class="note" id="korRecordNote">1승 0무 2패 / GD -1</div>
+          </div>
+          <div class="stat">
+            <div class="label">현재 판정</div>
+            <div class="value" id="korStatus">-</div>
+            <div class="note" id="korStatusNote">남은 조 결과 반영 필요</div>
+          </div>
+          <div class="stat">
+            <div class="label">간이 진출 확률</div>
+            <div class="value" id="probText">-</div>
+            <div class="progress"><div class="bar" id="probBar"></div></div>
+            <div class="note">공식 확률 아님</div>
+          </div>
+        </div>
+
+        <div id="scenarioBox" class="notice"></div>
+      </div>
+
+      <div class="card">
+        <h2>JSON 자동 갱신</h2>
+        <div class="small">
+          GitHub Raw JSON URL을 넣고 불러오면 됩니다.
+          점수가 <b>null</b>인 예정 경기는 “불러오긴 했지만 반영 제외”로 표시됩니다.
+        </div>
+        <div class="inputRow">
+          <input id="jsonUrl" value="https://raw.githubusercontent.com/leebj920-coder/storage/Worldcup/worldcup-results.json" />
+          <button id="loadBtn">불러오기</button>
+        </div>
+        <div class="inputRow">
+          <button class="secondary" id="saveUrlBtn">URL 저장</button>
+          <button class="secondary" id="autoBtn">60초 자동갱신 OFF</button>
+          <button class="warn" id="testBtn">테스트 점수 반영</button>
+        </div>
+        <div class="pillWrap">
+          <span class="pill">URL 상태 <b id="urlState">대기</b></span>
+          <span class="pill">불러온 경기 <b id="loadedCount">0</b></span>
+          <span class="pill">실제 반영 <b id="appliedCount">0</b></span>
+          <span class="pill">반영 제외 <b id="ignoredCount">0</b></span>
+        </div>
+        <div class="log" id="fetchLog">아직 외부 JSON을 불러오지 않았습니다.</div>
+      </div>
+    </section>
+
+    <section class="tables">
+      <div class="card">
+        <h2>조 3위 순위표</h2>
+        <div class="small">정렬 기준: 승점 → 골득실 → 다득점 → 팀 코드. 한국은 파란색으로 표시됩니다.</div>
+        <div id="thirdTable"></div>
+      </div>
+
+      <div class="card">
+        <h2>조별 순위표</h2>
+        <div class="tabs" id="groupTabs"></div>
+        <div id="groupTable"></div>
+      </div>
+
+      <div class="card">
+        <h2>남은 경기 직접 입력</h2>
+        <div class="small">GitHub JSON을 수정하기 전, 여기서 가상 점수를 넣어 경우의 수를 확인할 수 있습니다. 가상 초기화는 테스트/직접입력만 지우고, 전체 초기화는 JSON 반영값까지 지웁니다.</div>
+        <div class="matchEditor">
+          <div>
+            <div class="fieldLabel">경기</div>
+            <select id="matchSelect"></select>
+          </div>
+          <div>
+            <div class="fieldLabel">홈 점수</div>
+            <input class="num" type="number" min="0" id="homeScoreInput" />
+          </div>
+          <div>
+            <div class="fieldLabel">원정 점수</div>
+            <input class="num" type="number" min="0" id="awayScoreInput" />
+          </div>
+          <div>
+            <button id="applyManualBtn">가상 반영</button>
+          </div>
+          <div>
+            <button class="secondary" id="resetManualBtn">가상 초기화</button>
+          </div>
+          <div>
+            <button class="secondary" id="copyJsonBtn">현재 JSON 복사</button>
+          </div>
+          <div>
+            <button class="secondary" id="resetAllBtn">전체 초기화</button>
+          </div>
+        </div>
+        <textarea id="jsonPaste" placeholder='{"matches":[{"group":"G","home":"NZL","away":"BEL","homeScore":1,"awayScore":2,"status":"complete"}]}'></textarea>
+        <div class="inputRow">
+          <button id="applyPasteBtn">붙여넣은 JSON 반영</button>
+          <button class="secondary" id="clearPasteBtn">비우기</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="footerNote">
+      ※ 이 페이지는 결과 계산기입니다. FIFA 공식 API가 아닌 사용자가 제공한 JSON을 기준으로 자동 갱신합니다.
+      확률은 남은 경기의 임의 시뮬레이션 기반 추정치이며 공식 수치가 아닙니다.
+    </div>
+  </main>
+
+<script>
+const TEAMS = {
+  A:[["MEX","멕시코"],["RSA","남아공"],["KOR","대한민국"],["CZE","체코"]],
+  B:[["CAN","캐나다"],["BIH","보스니아"],["QAT","카타르"],["SUI","스위스"]],
+  C:[["BRA","브라질"],["MAR","모로코"],["HTI","아이티"],["SCO","스코틀랜드"]],
+  D:[["USA","미국"],["PAR","파라과이"],["AUS","호주"],["TUR","튀르키예"]],
+  E:[["GER","독일"],["CUW","퀴라소"],["CIV","코트디부아르"],["ECU","에콰도르"]],
+  F:[["NED","네덜란드"],["JPN","일본"],["SWE","스웨덴"],["TUN","튀니지"]],
+  G:[["BEL","벨기에"],["EGY","이집트"],["IRI","이란"],["NZL","뉴질랜드"]],
+  H:[["ESP","스페인"],["CPV","카보베르데"],["KSA","사우디"],["URU","우루과이"]],
+  I:[["FRA","프랑스"],["SEN","세네갈"],["IRQ","이라크"],["NOR","노르웨이"]],
+  J:[["ARG","아르헨티나"],["DZA","알제리"],["AUT","오스트리아"],["JOR","요르단"]],
+  K:[["POR","포르투갈"],["COD","DR콩고"],["UZB","우즈베키스탄"],["COL","콜롬비아"]],
+  L:[["ENG","잉글랜드"],["CRO","크로아티아"],["GHA","가나"],["PAN","파나마"]]
+};
+
+const BASE_MATCHES = [
+  // A
+  m("A","MEX","RSA",2,0,"complete"), m("A","KOR","CZE",2,1,"complete"),
+  m("A","CZE","RSA",1,1,"complete"), m("A","MEX","KOR",1,0,"complete"),
+  m("A","CZE","MEX",0,3,"complete"), m("A","RSA","KOR",1,0,"complete"),
+  // B
+  m("B","CAN","BIH",1,1,"complete"), m("B","QAT","SUI",1,1,"complete"),
+  m("B","SUI","BIH",4,1,"complete"), m("B","CAN","QAT",6,0,"complete"),
+  m("B","SUI","CAN",2,1,"complete"), m("B","BIH","QAT",3,1,"complete"),
+  // C
+  m("C","BRA","MAR",1,1,"complete"), m("C","HTI","SCO",0,1,"complete"),
+  m("C","SCO","MAR",0,1,"complete"), m("C","BRA","HTI",3,0,"complete"),
+  m("C","SCO","BRA",0,3,"complete"), m("C","MAR","HTI",4,2,"complete"),
+  // D
+  m("D","USA","PAR",4,1,"complete"), m("D","AUS","TUR",2,0,"complete"),
+  m("D","USA","AUS",2,0,"complete"), m("D","TUR","PAR",0,1,"complete"),
+  m("D","TUR","USA",3,2,"complete"), m("D","PAR","AUS",0,0,"complete"),
+  // E
+  m("E","GER","CUW",7,1,"complete"), m("E","CIV","ECU",1,0,"complete"),
+  m("E","GER","CIV",2,1,"complete"), m("E","ECU","CUW",0,0,"complete"),
+  m("E","ECU","GER",2,1,"complete"), m("E","CUW","CIV",0,2,"complete"),
+  // F
+  m("F","NED","JPN",2,2,"complete"), m("F","SWE","TUN",5,1,"complete"),
+  m("F","NED","SWE",5,1,"complete"), m("F","TUN","JPN",0,4,"complete"),
+  m("F","TUN","NED",1,3,"complete"), m("F","JPN","SWE",1,1,"complete"),
+  // G
+  m("G","BEL","EGY",1,1,"complete"), m("G","IRI","NZL",2,2,"complete"),
+  m("G","BEL","IRI",0,0,"complete"), m("G","NZL","EGY",1,3,"complete"),
+  m("G","NZL","BEL",null,null,"scheduled"), m("G","EGY","IRI",null,null,"scheduled"),
+  // H
+  m("H","ESP","CPV",0,0,"complete"), m("H","KSA","URU",1,1,"complete"),
+  m("H","ESP","KSA",4,0,"complete"), m("H","URU","CPV",2,2,"complete"),
+  m("H","URU","ESP",null,null,"scheduled"), m("H","CPV","KSA",null,null,"scheduled"),
+  // I
+  m("I","FRA","SEN",3,1,"complete"), m("I","IRQ","NOR",1,4,"complete"),
+  m("I","FRA","IRQ",3,0,"complete"), m("I","NOR","SEN",3,2,"complete"),
+  m("I","NOR","FRA",null,null,"scheduled"), m("I","SEN","IRQ",null,null,"scheduled"),
+  // J
+  m("J","ARG","DZA",3,0,"complete"), m("J","AUT","JOR",3,1,"complete"),
+  m("J","ARG","AUT",2,0,"complete"), m("J","JOR","DZA",1,2,"complete"),
+  m("J","JOR","ARG",null,null,"scheduled"), m("J","DZA","AUT",null,null,"scheduled"),
+  // K
+  m("K","POR","COD",1,1,"complete"), m("K","UZB","COL",1,3,"complete"),
+  m("K","POR","UZB",5,0,"complete"), m("K","COL","COD",1,0,"complete"),
+  m("K","COL","POR",null,null,"scheduled"), m("K","COD","UZB",null,null,"scheduled"),
+  // L
+  m("L","ENG","CRO",4,2,"complete"), m("L","GHA","PAN",1,0,"complete"),
+  m("L","ENG","GHA",0,0,"complete"), m("L","PAN","CRO",0,1,"complete"),
+  m("L","PAN","ENG",null,null,"scheduled"), m("L","CRO","GHA",null,null,"scheduled")
+];
+
+const STRENGTH = {
+  MEX:78,RSA:62,KOR:72,CZE:70,CAN:72,BIH:68,QAT:60,SUI:77,BRA:88,MAR:81,HTI:56,SCO:70,
+  USA:77,PAR:70,AUS:71,TUR:74,GER:86,CUW:52,CIV:73,ECU:75,NED:85,JPN:79,SWE:73,TUN:67,
+  BEL:82,EGY:75,IRI:73,NZL:60,ESP:88,CPV:62,KSA:65,URU:81,FRA:90,SEN:79,IRQ:64,NOR:76,
+  ARG:90,DZA:74,AUT:78,JOR:61,POR:88,COD:67,UZB:68,COL:79,ENG:87,CRO:80,GHA:73,PAN:62
+};
+
+let externalMatches = [];
+let manualMatches = [];
+let activeGroup = "A";
+let autoTimer = null;
+
+function m(group, home, away, homeScore, awayScore, status="scheduled"){
+  return { group, home, away, homeScore, awayScore, status };
+}
+function teamName(code){
+  for(const group of Object.values(TEAMS)){
+    const found = group.find(t=>t[0]===code);
+    if(found) return found[1];
+  }
+  return code;
+}
+function isNum(v){ return typeof v === "number" && Number.isFinite(v); }
+function normalizeStatus(s){ return String(s||"").toLowerCase(); }
+function isCompleted(match){
+  return isNum(match.homeScore) && isNum(match.awayScore);
+}
+function matchKey(match){
+  return [match.group, match.home, match.away].join("|");
+}
+function reverseKey(match){
+  return [match.group, match.away, match.home].join("|");
+}
+function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
+function safeStorageGet(key){
+  try{ return window.localStorage ? localStorage.getItem(key) : null; }
+  catch(e){ return null; }
+}
+function safeStorageSet(key, value){
+  try{ if(window.localStorage) localStorage.setItem(key, value); return true; }
+  catch(e){ return false; }
+}
+
+function validateExternal(raw){
+  const list = Array.isArray(raw) ? raw : raw?.matches;
+  const stats = { loaded:0, applied:0, ignored:0, invalid:0, messages:[] };
+  const out = [];
+  if(!Array.isArray(list)){
+    stats.invalid++;
+    stats.messages.push("JSON 안에 matches 배열이 없습니다.");
+    return { matches:[], stats };
+  }
+
+  stats.loaded = list.length;
+
+  for(const item of list){
+    const group = String(item.group || "").toUpperCase();
+    const home = String(item.home || "").toUpperCase();
+    const away = String(item.away || "").toUpperCase();
+    const homeScore = item.homeScore === null || item.homeScore === "" || item.homeScore === undefined ? null : Number(item.homeScore);
+    const awayScore = item.awayScore === null || item.awayScore === "" || item.awayScore === undefined ? null : Number(item.awayScore);
+    const status = normalizeStatus(item.status || "scheduled");
+    const groupTeams = (TEAMS[group] || []).map(t=>t[0]);
+
+    if(!TEAMS[group] || !groupTeams.includes(home) || !groupTeams.includes(away) || home === away){
+      stats.invalid++;
+      stats.ignored++;
+      stats.messages.push(`형식 오류: ${group || "?"} ${home || "?"} vs ${away || "?"}`);
+      continue;
+    }
+
+    if(isNum(homeScore) && isNum(awayScore)){
+      out.push({group,home,away,homeScore,awayScore,status: "complete"});
+      stats.applied++;
+      if(status === "scheduled"){
+        stats.messages.push(`주의: ${home} vs ${away}는 status가 scheduled이지만 점수가 있어 완료 경기로 반영했습니다.`);
+      }else{
+        stats.messages.push(`반영: ${home} ${homeScore} - ${awayScore} ${away}`);
+      }
+    }else{
+      stats.ignored++;
+      stats.messages.push(`제외: ${home} vs ${away}는 점수가 null이라 계산에 반영하지 않았습니다.`);
+      // 점수가 없는 scheduled/null 경기는 계산 레이어에 넣지 않습니다.
+      // 그래야 기존 공식 스냅샷이나 가상 점수를 null로 덮어쓰지 않습니다.
+    }
+  }
+  return { matches:out, stats };
+}
+
+function getAllMatches(){
+  const map = new Map();
+  BASE_MATCHES.forEach(x=>map.set(matchKey(x), clone(x)));
+
+  function apply(list, layerName){
+    list.forEach(x=>{
+      if(!isCompleted(x)) return;
+      const key = matchKey(x);
+      const rkey = reverseKey(x);
+      if(map.has(key)){
+        map.set(key, clone(x));
+      }else if(map.has(rkey)){
+        const fixed = clone(x);
+        const original = map.get(rkey);
+        map.set(rkey, {
+          group: original.group,
+          home: original.home,
+          away: original.away,
+          homeScore: fixed.awayScore,
+          awayScore: fixed.homeScore,
+          status: "complete"
+        });
+      }else{
+        map.set(key, clone(x));
+      }
+    });
+  }
+
+  // 우선순위: 기본 공식 스냅샷 < 외부 JSON 완료 점수 < 가상 입력
+  apply(externalMatches, "external");
+  apply(manualMatches, "manual");
+  return [...map.values()];
+}
+
+function initialTable(){
+  const table = {};
+  for(const [group, teams] of Object.entries(TEAMS)){
+    table[group] = {};
+    teams.forEach(([code,name])=>{
+      table[group][code] = { group, code, name, played:0, win:0, draw:0, loss:0, gf:0, ga:0, gd:0, pts:0 };
+    });
+  }
+  return table;
+}
+
+function buildStandings(matches){
+  const table = initialTable();
+
+  matches.filter(isCompleted).forEach(match=>{
+    const h = table[match.group]?.[match.home];
+    const a = table[match.group]?.[match.away];
+    if(!h || !a) return;
+    h.played++; a.played++;
+    h.gf += match.homeScore; h.ga += match.awayScore;
+    a.gf += match.awayScore; a.ga += match.homeScore;
+    if(match.homeScore > match.awayScore){ h.win++; a.loss++; h.pts+=3; }
+    else if(match.homeScore < match.awayScore){ a.win++; h.loss++; a.pts+=3; }
+    else{ h.draw++; a.draw++; h.pts++; a.pts++; }
+  });
+
+  for(const group of Object.keys(table)){
+    for(const code of Object.keys(table[group])){
+      const t = table[group][code];
+      t.gd = t.gf - t.ga;
+    }
+  }
+  return table;
+}
+
+function sortTeams(arr){
+  return [...arr].sort((a,b)=>
+    b.pts-a.pts || b.gd-a.gd || b.gf-a.gf || a.code.localeCompare(b.code)
+  );
+}
+function compareThird(a,b){
+  return b.pts-a.pts || b.gd-a.gd || b.gf-a.gf || a.code.localeCompare(b.code);
+}
+function thirdTeamsFromStandings(standings){
+  return Object.keys(standings).map(group=>{
+    const sorted = sortTeams(Object.values(standings[group]));
+    return {...sorted[2], thirdRankInGroup:3};
+  }).sort(compareThird);
+}
+function betterThanKorea(team, kor){
+  return compareThird(team, kor) < 0;
+}
+
+function render(){
+  const matches = getAllMatches();
+  const standings = buildStandings(matches);
+  const thirds = thirdTeamsFromStandings(standings);
+  const kor = thirds.find(t=>t.code==="KOR");
+  const korRank = thirds.findIndex(t=>t.code==="KOR") + 1;
+  const above = korRank - 1;
+  const margin = 8 - korRank;
+  const remaining = matches.filter(x=>!isCompleted(x)).length;
+
+  document.getElementById("korRank").textContent = `${korRank}위`;
+  document.getElementById("korRecord").textContent = `${kor.pts}점`;
+  document.getElementById("korRecordNote").textContent =
+    `${kor.win}승 ${kor.draw}무 ${kor.loss}패 / GD ${fmt(kor.gd)} / 득점 ${kor.gf}`;
+
+  const badge = document.getElementById("mainBadge");
+  const statusText = document.getElementById("korStatus");
+  const statusNote = document.getElementById("korStatusNote");
+  const scenario = document.getElementById("scenarioBox");
+
+  badge.className = "statusBadge";
+  if(korRank <= 8){
+    statusText.textContent = remaining ? "현재 진출권" : "진출";
+    statusNote.textContent = remaining ? `현재 기준 상위 8팀 안쪽, 남은 경기 ${remaining}개` : "최종 상위 8팀";
+    badge.classList.add("good");
+    badge.textContent = remaining ? `현재 한국은 조 3위 ${korRank}위, 진출권입니다.` : "한국 32강 진출";
+  }else{
+    statusText.textContent = remaining ? "현재 위험" : "탈락";
+    statusNote.textContent = remaining ? `현재 기준 상위 8팀 밖, 남은 경기 ${remaining}개` : "최종 상위 8팀 밖";
+    badge.classList.add("bad");
+    badge.textContent = remaining ? `현재 한국은 조 3위 ${korRank}위, 진출권 밖입니다.` : "한국 탈락";
+  }
+
+  const additionalDanger = Math.max(0, korRank - 8);
+  const canBePassed = countPotentialPassers(matches, kor);
+  scenario.className = "notice " + (margin >= 0 ? "" : "badBox");
+  scenario.innerHTML = `
+    <b>현재 해석</b><br>
+    한국보다 위에 있는 조 3위 팀은 <b>${above}팀</b>입니다.
+    상위 8팀까지 진출하므로 현재 여유는 <b>${Math.max(0, margin)}칸</b>입니다.
+    남은 경기 결과에 따라 한국을 추월할 수 있는 조는 최대 <b>${canBePassed}개</b>로 계산됩니다.
+    ${remaining ? "<br>아직 최종 확정은 아니며, 남은 조의 3위가 한국 성적을 넘는지 봐야 합니다." : "<br>모든 조별 경기가 반영된 상태입니다."}
+  `;
+
+  renderThirdTable(thirds, kor);
+  renderGroupTabs(standings);
+  renderGroupTable(standings, activeGroup);
+  populateMatchSelect(matches);
+  updateProbability(matches);
+}
+
+function countPotentialPassers(matches, kor){
+  const standings = buildStandings(matches);
+  let count = 0;
+  for(const group of Object.keys(TEAMS)){
+    if(group === "A") continue;
+    const currentThird = sortTeams(Object.values(standings[group]))[2];
+    if(betterThanKorea(currentThird, kor)) continue;
+    const remaining = matches.filter(m=>m.group===group && !isCompleted(m));
+    if(remaining.length === 0) continue;
+    const possible = bruteForceGroupCanPass(group, matches, kor);
+    if(possible) count++;
+  }
+  return count;
+}
+
+function bruteForceGroupCanPass(group, allMatches, kor){
+  const groupMatches = allMatches.filter(m=>m.group===group);
+  const rem = groupMatches.filter(m=>!isCompleted(m));
+  if(rem.length === 0) return false;
+
+  const outcomes = [
+    [2,0],[1,0],[0,0],[0,1],[0,2],[3,1],[1,3]
+  ];
+  let possible = false;
+
+  function rec(idx, list){
+    if(possible) return;
+    if(idx === rem.length){
+      const simulated = allMatches.map(x=>clone(x));
+      for(const updated of list){
+        const i = simulated.findIndex(x=>matchKey(x)===matchKey(updated));
+        if(i >= 0) simulated[i] = updated;
+      }
+      const s = buildStandings(simulated);
+      const third = sortTeams(Object.values(s[group]))[2];
+      if(betterThanKorea(third, kor)) possible = true;
+      return;
+    }
+    for(const [hs,as] of outcomes){
+      const x = {...rem[idx], homeScore:hs, awayScore:as, status:"complete"};
+      rec(idx+1, [...list, x]);
+    }
+  }
+  rec(0, []);
+  return possible;
+}
+
+function renderThirdTable(thirds, kor){
+  const rows = thirds.map((t,idx)=>{
+    const rank = idx+1;
+    const cls = t.code==="KOR" ? "korea" : rank<=8 ? "safe" : "out";
+    const vsKor = t.code==="KOR" ? "대한민국" : betterThanKorea(t, kor) ? "한국보다 위" : "한국보다 아래";
+    return `<tr class="${cls}">
+      <td>${rank}. ${t.name} <span class="small">(${t.group}조)</span></td>
+      <td>${t.pts}</td><td>${t.played}</td><td>${fmt(t.gd)}</td><td>${t.gf}</td><td>${vsKor}</td>
+    </tr>`;
+  }).join("");
+  document.getElementById("thirdTable").innerHTML = `
+    <table>
+      <thead><tr><th>팀</th><th>승점</th><th>경기</th><th>GD</th><th>득점</th><th>판정</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function renderGroupTabs(standings){
+  const tabs = Object.keys(TEAMS).map(g=>
+    `<button class="tab ${g===activeGroup?"active":""}" data-group="${g}">${g}조</button>`
+  ).join("");
+  const wrap = document.getElementById("groupTabs");
+  wrap.innerHTML = tabs;
+  wrap.querySelectorAll(".tab").forEach(btn=>{
+    btn.onclick = () => {
+      activeGroup = btn.dataset.group;
+      render();
+    };
+  });
+}
+
+function renderGroupTable(standings, group){
+  const sorted = sortTeams(Object.values(standings[group]));
+  const rows = sorted.map((t,idx)=>`
+    <tr class="${t.code==="KOR"?"korea":""}">
+      <td>${idx+1}. ${t.name}</td>
+      <td>${t.pts}</td><td>${t.played}</td><td>${t.win}</td><td>${t.draw}</td><td>${t.loss}</td>
+      <td>${t.gf}</td><td>${t.ga}</td><td>${fmt(t.gd)}</td>
+    </tr>`).join("");
+  document.getElementById("groupTable").innerHTML = `
+    <table>
+      <thead><tr><th>팀</th><th>승점</th><th>경기</th><th>승</th><th>무</th><th>패</th><th>득</th><th>실</th><th>GD</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function populateMatchSelect(matches){
+  const select = document.getElementById("matchSelect");
+  const current = select.value;
+  const rem = matches.filter(x=>!isCompleted(x));
+  select.innerHTML = rem.map(x=>`<option value="${matchKey(x)}">${x.group}조 ${teamName(x.home)} vs ${teamName(x.away)}</option>`).join("");
+  if([...select.options].some(o=>o.value===current)) select.value = current;
+}
+
+async function loadJson(){
+  const url = document.getElementById("jsonUrl").value.trim();
+  const log = document.getElementById("fetchLog");
+  const urlState = document.getElementById("urlState");
+  document.getElementById("rawOpenLink").href = url || "#";
+  if(!url){
+    urlState.textContent = "URL 없음";
+    log.textContent = "JSON URL을 입력해주세요.";
+    return;
+  }
+
+  try{
+    urlState.textContent = "불러오는 중";
+    log.textContent = "JSON을 불러오는 중입니다...";
+    const res = await fetch(url + (url.includes("?") ? "&" : "?") + "_t=" + Date.now(), { cache:"no-store" });
+    if(!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+    const raw = await res.json();
+    const {matches, stats} = validateExternal(raw);
+    externalMatches = matches;
+    updateLoadStats(stats, `성공: ${new Date().toLocaleString("ko-KR")}\nURL: ${url}`);
+    safeStorageSet("worldcupJsonUrl", url);
+    render();
+  }catch(err){
+    urlState.textContent = "실패";
+    document.getElementById("loadedCount").textContent = "0";
+    document.getElementById("appliedCount").textContent = "0";
+    document.getElementById("ignoredCount").textContent = "0";
+    log.textContent =
+`불러오기 실패
+${err.message}
+
+확인할 것:
+1) GitHub 주소가 raw.githubusercontent.com 형태인지
+2) 파일명이 worldcup-results.json인지
+3) 브랜치명이 Worldcup인지
+4) JSON 문법 오류가 없는지`;
+  }
+}
+
+function updateLoadStats(stats, prefix=""){
+  document.getElementById("urlState").textContent = "성공";
+  document.getElementById("loadedCount").textContent = stats.loaded;
+  document.getElementById("appliedCount").textContent = stats.applied;
+  document.getElementById("ignoredCount").textContent = stats.ignored;
+  const msg = [
+    prefix,
+    `불러온 경기: ${stats.loaded}개`,
+    `실제 반영: ${stats.applied}개`,
+    `반영 제외: ${stats.ignored}개`,
+    `형식 오류: ${stats.invalid}개`,
+    "",
+    ...stats.messages.slice(0, 16)
+  ].filter(Boolean).join("\n");
+  document.getElementById("fetchLog").textContent = msg || "반영 완료";
+}
+
+function applyPastedJson(){
+  const txt = document.getElementById("jsonPaste").value.trim();
+  if(!txt){
+    document.getElementById("fetchLog").textContent = "붙여넣은 JSON이 없습니다.";
+    return;
+  }
+  try{
+    const raw = JSON.parse(txt);
+    const {matches, stats} = validateExternal(raw);
+    externalMatches = matches;
+    updateLoadStats(stats, `붙여넣기 반영: ${new Date().toLocaleString("ko-KR")}`);
+    render();
+  }catch(err){
+    document.getElementById("fetchLog").textContent = "JSON 문법 오류: " + err.message;
+  }
+}
+
+function applyManual(){
+  const key = document.getElementById("matchSelect").value;
+  const hsRaw = document.getElementById("homeScoreInput").value;
+  const asRaw = document.getElementById("awayScoreInput").value;
+  if(!key || hsRaw === "" || asRaw === ""){
+    document.getElementById("fetchLog").textContent = "가상 반영할 경기와 양쪽 점수를 모두 입력해주세요. 빈칸은 0점으로 처리하지 않습니다.";
+    return;
+  }
+  const hs = Number(hsRaw);
+  const as = Number(asRaw);
+  if(!Number.isInteger(hs) || !Number.isInteger(as) || hs < 0 || as < 0){
+    document.getElementById("fetchLog").textContent = "점수는 0 이상의 정수로 입력해주세요.";
+    return;
+  }
+  const [group, home, away] = key.split("|");
+  const item = {group, home, away, homeScore:hs, awayScore:as, status:"complete"};
+  manualMatches = manualMatches.filter(x=>matchKey(x)!==key && reverseKey(x)!==key);
+  manualMatches.push(item);
+  document.getElementById("fetchLog").textContent = `가상 반영 완료: ${teamName(home)} ${hs} - ${as} ${teamName(away)}\n외부 JSON 데이터는 유지되고, 이 가상 점수가 우선 적용됩니다.`;
+  render();
+}
+
+function resetManual(){
+  manualMatches = [];
+  document.getElementById("homeScoreInput").value = "";
+  document.getElementById("awayScoreInput").value = "";
+  document.getElementById("fetchLog").textContent = "가상 입력과 테스트 점수만 초기화했습니다. GitHub/붙여넣기 JSON 반영값은 유지됩니다.";
+  render();
+}
+
+function resetAll(){
+  manualMatches = [];
+  externalMatches = [];
+  document.getElementById("loadedCount").textContent = "0";
+  document.getElementById("appliedCount").textContent = "0";
+  document.getElementById("ignoredCount").textContent = "0";
+  document.getElementById("urlState").textContent = "초기화";
+  document.getElementById("jsonPaste").value = "";
+  document.getElementById("homeScoreInput").value = "";
+  document.getElementById("awayScoreInput").value = "";
+  document.getElementById("fetchLog").textContent = "전체 초기화 완료: 외부 JSON, 붙여넣기 반영값, 가상 입력을 모두 지우고 기본 경기결과로 돌아갑니다.";
+  render();
+}
+
+async function copyCurrentJson(){
+  const matches = getAllMatches()
+    .filter(x=>isCompleted(x))
+    .filter(x=>!BASE_MATCHES.some(b=>matchKey(b)===matchKey(x) && b.homeScore===x.homeScore && b.awayScore===x.awayScore && b.status===x.status))
+    .map(x=>({
+      group:x.group, home:x.home, away:x.away,
+      homeScore:x.homeScore, awayScore:x.awayScore,
+      status:"complete"
+    }));
+  const txt = JSON.stringify({matches}, null, 2);
+  document.getElementById("jsonPaste").value = txt;
+  try{
+    await navigator.clipboard.writeText(txt);
+    document.getElementById("fetchLog").textContent = "현재 반영된 외부/가상 완료 경기 JSON을 복사하고 입력창에도 넣었습니다.";
+  }catch(e){
+    document.getElementById("fetchLog").textContent = "클립보드 자동 복사는 브라우저 보안상 막혔지만, JSON 입력창에 현재 데이터가 들어갔습니다.";
+  }
+}
+
+function testScore(){
+  const sample = { group:"G", home:"NZL", away:"BEL", homeScore:1, awayScore:2, status:"complete" };
+  manualMatches = manualMatches.filter(x=>matchKey(x)!==matchKey(sample));
+  manualMatches.push(sample);
+  document.getElementById("jsonPaste").value = JSON.stringify({matches:[sample]}, null, 2);
+  document.getElementById("fetchLog").textContent = "테스트 점수 반영 완료: 뉴질랜드 1 - 2 벨기에\n이 값은 가상 레이어에만 들어갔습니다. '가상 초기화'로 바로 지울 수 있습니다.";
+  render();
+}
+
+function toggleAuto(){
+  const btn = document.getElementById("autoBtn");
+  if(autoTimer){
+    clearInterval(autoTimer);
+    autoTimer = null;
+    btn.textContent = "60초 자동갱신 OFF";
+    document.getElementById("fetchLog").textContent = "자동갱신을 껐습니다.";
+  }else{
+    autoTimer = setInterval(loadJson, 60000);
+    btn.textContent = "60초 자동갱신 ON";
+    loadJson();
+  }
+}
+
+function updateProbability(matches){
+  const runs = 2500;
+  let pass = 0;
+  for(let i=0;i<runs;i++){
+    const sim = matches.map(x=>clone(x));
+    for(const game of sim){
+      if(!isCompleted(game)){
+        const [hs,as] = randomScore(game.home, game.away);
+        game.homeScore = hs;
+        game.awayScore = as;
+        game.status = "complete";
+      }
+    }
+    const s = buildStandings(sim);
+    const thirds = thirdTeamsFromStandings(s);
+    const rank = thirds.findIndex(t=>t.code==="KOR") + 1;
+    if(rank <= 8) pass++;
+  }
+  const p = Math.round(pass / runs * 1000) / 10;
+  document.getElementById("probText").textContent = `${p}%`;
+  document.getElementById("probBar").style.width = `${p}%`;
+}
+
+function randomScore(home, away){
+  const diff = (STRENGTH[home] || 70) - (STRENGTH[away] || 70);
+  const homeWinP = clamp(0.36 + diff/140, 0.18, 0.68);
+  const drawP = clamp(0.25 - Math.abs(diff)/300, 0.16, 0.30);
+  const awayWinP = 1 - homeWinP - drawP;
+  const r = Math.random();
+  let result = "D";
+  if(r < homeWinP) result = "H";
+  else if(r > homeWinP + drawP) result = "A";
+
+  if(result === "D"){
+    const d = weighted([0,1,2], [0.38,0.46,0.16]);
+    return [d,d];
+  }
+  if(result === "H"){
+    const a = weighted([0,1,2], [0.52,0.36,0.12]);
+    const margin = weighted([1,2,3], [0.62,0.28,0.10]);
+    return [a+margin,a];
+  }
+  const h = weighted([0,1,2], [0.52,0.36,0.12]);
+  const margin = weighted([1,2,3], [0.62,0.28,0.10]);
+  return [h,h+margin];
+}
+function weighted(values, weights){
+  const r = Math.random();
+  let acc = 0;
+  for(let i=0;i<values.length;i++){
+    acc += weights[i];
+    if(r <= acc) return values[i];
+  }
+  return values[values.length-1];
+}
+function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
+function fmt(n){ return n > 0 ? `+${n}` : String(n); }
+
+document.getElementById("loadBtn").onclick = loadJson;
+document.getElementById("saveUrlBtn").onclick = () => {
+  const url = document.getElementById("jsonUrl").value.trim();
+  safeStorageSet("worldcupJsonUrl", url);
+  document.getElementById("fetchLog").textContent = "URL을 브라우저에 저장했습니다.";
+};
+document.getElementById("autoBtn").onclick = toggleAuto;
+document.getElementById("applyPasteBtn").onclick = applyPastedJson;
+document.getElementById("clearPasteBtn").onclick = () => document.getElementById("jsonPaste").value = "";
+document.getElementById("applyManualBtn").onclick = applyManual;
+document.getElementById("resetManualBtn").onclick = resetManual;
+document.getElementById("resetAllBtn").onclick = resetAll;
+document.getElementById("copyJsonBtn").onclick = copyCurrentJson;
+document.getElementById("testBtn").onclick = testScore;
+
+const savedUrl = safeStorageGet("worldcupJsonUrl");
+if(savedUrl) document.getElementById("jsonUrl").value = savedUrl;
+render();
+</script>
+</body>
+</html>
