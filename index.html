@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>효율미쳤조의 보물창고</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --line: rgba(15, 23, 42, 0.08);
+      --shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+      --shadow-hover: 0 16px 40px rgba(15, 23, 42, 0.14);
+      --sales: #2f7a45;
+      --sales-soft: #eef8f1;
+      --marketing: #9d3d70;
+      --marketing-soft: #fff0f7;
+      --design: #5b4ab8;
+      --design-soft: #f1eeff;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, "Noto Sans KR", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(47, 122, 69, 0.10), transparent 26%),
+        radial-gradient(circle at top right, rgba(157, 61, 112, 0.08), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(91, 74, 184, 0.09), transparent 28%),
+        var(--bg);
+      color: var(--ink);
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 48px 20px 64px;
+    }
+
+    .header { margin-bottom: 24px; }
+
+    h1 {
+      font-size: 34px;
+      margin: 0 0 10px;
+      letter-spacing: -0.04em;
+    }
+
+    .desc {
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.55;
+      font-size: 15px;
+      word-break: keep-all;
+    }
+
+    .notice {
+      margin: 0 0 32px;
+      padding: 14px 16px;
+      border: 1px solid rgba(49, 84, 184, 0.18);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.72);
+      color: #4b5563;
+      font-size: 13px;
+      line-height: 1.55;
+      word-break: keep-all;
+    }
+
+    .notice b { color: #1f2937; }
+
+    .category { margin-top: 30px; }
+
+    .category-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+      padding: 0 2px;
+    }
+
+    .category-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      font-size: 21px;
+      letter-spacing: -0.03em;
+    }
+
+    .category-title .icon {
+      width: 34px;
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+    }
+
+    .category-count {
+      flex-shrink: 0;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid var(--line);
+      padding: 6px 10px;
+      border-radius: 999px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      position: relative;
+      display: block;
+      min-height: 170px;
+      padding: 22px;
+      overflow: hidden;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      color: inherit;
+      text-decoration: none;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: auto 18px 0 18px;
+      height: 4px;
+      border-radius: 999px 999px 0 0;
+      opacity: 0.92;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .card.sales::after { background: var(--sales); }
+    .card.marketing::after { background: var(--marketing); }
+    .card.design::after { background: var(--design); }
+
+    .emoji { font-size: 33px; margin-bottom: 14px; }
+
+    .title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 9px;
+      letter-spacing: -0.03em;
+    }
+
+    .text {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.55;
+      word-break: keep-all;
+    }
+
+    .tag {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      word-break: break-all;
+    }
+
+    .sales .tag { background: var(--sales-soft); color: var(--sales); }
+    .marketing .tag { background: var(--marketing-soft); color: var(--marketing); }
+    .design .tag { background: var(--design-soft); color: var(--design); }
+
+    .footer-note {
+      margin-top: 34px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      .wrap { padding: 34px 16px 48px; }
+      h1 { font-size: 27px; }
+      .category-head { align-items: flex-start; flex-direction: column; gap: 8px; }
+      .category-title { font-size: 19px; }
+      .card { padding: 20px; min-height: 158px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="header">
+      <h1>효율미쳤조의 보물창고</h1>
+      <p class="desc">필요한 업무 도구를 카테고리별로 선택해 사용하세요.</p>
+    </header>
+
+    <p class="notice">
+      <b>사용 전 확인:</b> 아래 카드들은 같은 폴더 안의 HTML 파일로 연결됩니다. 이 <b>index.html만 단독 다운로드</b>하면 연결 파일이 없어 “파일을 찾을 수 없음”이 뜹니다. 모든 HTML 파일을 index.html과 같은 폴더에 넣어주세요.
+    </p>
+
+    <section class="category" aria-labelledby="sales-title">
+      <div class="category-head">
+        <h2 class="category-title" id="sales-title"><span class="icon">🏪</span>영업 / SV</h2>
+        <span class="category-count">3개 도구</span>
+      </div>
+      <div class="grid">
+        <a class="card sales" href="./roi-calculator.html">
+          <div class="emoji">📈</div>
+          <div class="title">점포 ROI 계산기</div>
+          <div class="text">점포 신규 개설, 점주 교체, 리뉴얼 비용 기준으로 ROI·회수기간·손익분기점을 계산합니다.</div>
+          <span class="tag">roi-calculator.html</span>
+        </a>
+        <a class="card sales" href="./cost.html">
+          <div class="emoji">💸</div>
+          <div class="title">직영점포 인건비 계산기</div>
+          <div class="text">직원별 근로시간, 주휴수당, 월별 인건비를 계산합니다.</div>
+          <span class="tag">cost.html</span>
+        </a>
+        <a class="card sales" href="./pro_ver3.html">
+          <div class="emoji">🕵️‍♂️</div>
+          <div class="title">SV 경쟁사 프로모션 분석센터</div>
+          <div class="text">연·월 기준 경쟁사 프로모션을 분석하고 점주 대응 브리핑 자료를 확인합니다.</div>
+          <span class="tag">pro_ver3.html</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="category" aria-labelledby="marketing-title">
+      <div class="category-head">
+        <h2 class="category-title" id="marketing-title"><span class="icon">📣</span>마케팅</h2>
+        <span class="category-count">5개 도구</span>
+      </div>
+      <div class="grid">
+        <a class="card marketing" href="./profit-calculator.html">
+          <div class="emoji">📊</div>
+          <div class="title">제품별 손익 계산기</div>
+          <div class="text">판매가, 원가, 수량 등을 입력해 제품별 손익을 계산합니다.</div>
+          <span class="tag">profit-calculator.html</span>
+        </a>
+        <a class="card marketing" href="./review_keyword_analyzer_positive_added.html">
+          <div class="emoji">💬</div>
+          <div class="title">리뷰 키워드 분석기</div>
+          <div class="text">리뷰 raw 데이터를 업로드하면 별점과 고객기재 내용을 기준으로 긍정·부정 키워드를 분석합니다.</div>
+          <span class="tag">review_keyword_analyzer_positive_added.html</span>
+        </a>
+        <a class="card marketing" href="./research.html">
+          <div class="emoji">🔎</div>
+          <div class="title">시장조사비 보고서 자동화</div>
+          <div class="text">상호명, 영수증, 사진을 입력해 시장조사 보고서를 작성하고 PPT·PDF로 추출합니다.</div>
+          <span class="tag">research.html</span>
+        </a>
+        <a class="card marketing" href="./event_detail_page_format_builder_link.html">
+          <div class="emoji">🧩</div>
+          <div class="title">기획전 상세페이지 빌더</div>
+          <div class="text">키비주얼, 상품 영역, 설명 영역을 조합해 기획전 상세페이지 구조를 만듭니다.</div>
+          <span class="tag">event_detail_page_format_builder_link.html</span>
+        </a>
+        <a class="card marketing" href="./app_push_ai_generator_careet_trend%20(1).html">
+          <div class="emoji">📣</div>
+          <div class="title">앱푸시 AI 문구 생성기</div>
+          <div class="text">키워드와 혜택을 입력하면 파바앱 스타일의 앱푸시 제목과 내용을 자동 생성합니다.</div>
+          <span class="tag">app_push_ai_generator_careet_trend (1).html</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="category" aria-labelledby="design-title">
+      <div class="category-head">
+        <h2 class="category-title" id="design-title"><span class="icon">🎨</span>디자인</h2>
+        <span class="category-count">4개 도구</span>
+      </div>
+      <div class="grid">
+        <a class="card design" href="./specbook_1.html">
+          <div class="emoji">📚</div>
+          <div class="title">마감재 스펙북 생성기</div>
+          <div class="text">투시도·준공사진을 바탕으로 마감재 리스트를 만들고 Excel·CSV·PDF로 내보냅니다.</div>
+          <span class="tag">specbook_1.html</span>
+        </a>
+        <a class="card design" href="./image-converter.html">
+          <div class="emoji">🖼️</div>
+          <div class="title">이미지 컨버터</div>
+          <div class="text">이미지를 용도별 규격에 맞게 변환합니다.</div>
+          <span class="tag">image-converter.html</span>
+        </a>
+        <a class="card design" href="./orderbudget.html">
+          <div class="emoji">💰</div>
+          <div class="title">가구 제작 예가 산출기</div>
+          <div class="text">가구 이미지를 분석해 자재비, 인건비, 경비 기준의 제작 예가를 산출합니다.</div>
+          <span class="tag">orderbudget.html</span>
+        </a>
+        <a class="card design" href="./ordercreator.html">
+          <div class="emoji">🪑</div>
+          <div class="title">가구 발주서 생성기</div>
+          <div class="text">가구 이미지를 업로드하면 AI 분석 기반으로 발주서를 작성하고 인쇄·PDF 저장까지 진행합니다.</div>
+          <span class="tag">ordercreator.html</span>
+        </a>
+      </div>
+    </section>
+
+    <p class="footer-note">파일명은 카드의 태그와 정확히 같아야 합니다. 괄호, 띄어쓰기, 대소문자까지 맞춰주세요.</p>
+  </main>
+</body>
+</html>
